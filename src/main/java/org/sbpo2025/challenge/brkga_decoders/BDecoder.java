@@ -1,3 +1,5 @@
+package org.sbpo2025.challenge.brkga_decoders;
+
 import org.sbpo2025.ChallengeSolution;
 
 interface BDecoder {
