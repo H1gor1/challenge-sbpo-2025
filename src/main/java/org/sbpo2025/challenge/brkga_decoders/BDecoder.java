@@ -10,5 +10,5 @@ interface BDecoder {
      * @param instanceData The data of the current problem instance that was provided to solve it.
      * @return An instance of ChallengeSolution representing a valid solution to the problem.
      */
-    abstract ChallengeSolution decode(double[] keys, ProblemData instanceData);
+    ChallengeSolution decode(double[] keys, ProblemData instanceData);
 }
