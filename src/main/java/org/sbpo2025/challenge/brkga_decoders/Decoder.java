@@ -5,6 +5,14 @@ import java.util.List;
 import org.sbpo2025.ChallengeSolution;
 
 interface Decoder {
+
+    /**
+     * Returns the number of random keys that the decoder needs to work.
+     */
+    int getRKeysSize();
+
+
+
     /**
      * Receives an array of random keys and decodes them into an instance of ChallengeSolution.
      * 
