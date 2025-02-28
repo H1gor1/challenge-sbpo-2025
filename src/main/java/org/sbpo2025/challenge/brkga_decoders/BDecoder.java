@@ -1,5 +1,7 @@
 package org.sbpo2025.challenge.brkga_decoders;
 
+import java.util.List;
+
 import org.sbpo2025.ChallengeSolution;
 
 interface BDecoder {
@@ -10,5 +12,5 @@ interface BDecoder {
      * @param instanceData The data of the current problem instance that was provided to solve it.
      * @return An instance of ChallengeSolution representing a valid solution to the problem.
      */
-    ChallengeSolution decode(double[] keys, ProblemData instanceData);
+    ChallengeSolution decode(List<Double> keys, ProblemData instanceData);
 }
