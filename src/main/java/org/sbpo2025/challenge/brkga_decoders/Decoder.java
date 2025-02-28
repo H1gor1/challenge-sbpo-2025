@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.sbpo2025.ChallengeSolution;
 
-interface BDecoder {
+interface Decoder {
     /**
      * Receives an array of random keys and decodes them into an instance of ChallengeSolution.
      * 
