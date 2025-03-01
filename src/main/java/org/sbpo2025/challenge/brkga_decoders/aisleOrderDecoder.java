@@ -134,6 +134,10 @@ public class aisleOrderDecoder implements Decoder{
             currentOrder = orderKeys.get(i);
             orderItensSum = instanceData.orders().get(currentOrder).values().stream().mapToInt(Integer::intValue).sum();
 
+            // if add this order to the response will exceed the wave upper bound constraint, then we skip it
+            if ( itensSum + orderItensSum > instanceData.waveSizeUB()){
+                continue;
+            }
             // if the order is currently servable, then we add it to the response
             if ( isOrderServable(currentOrder, QuantItens, instanceData) ){
                 orderResp.add(currentOrder);
@@ -143,9 +147,12 @@ public class aisleOrderDecoder implements Decoder{
                 continue;
             }
             //otherwise, we need to check if we can find a feasible aisle to serve the order
-            if ( (itensSum + orderItensSum)/(double)(aisleResp.size() + 1) < foAt){
+            // This if statement checks if it's advantageous to add a new aisle to make the current order servable,
+            // but only if the quantity of items already satisfies the lower bound constraint.
+            if ((itensSum + orderItensSum) / (double)(aisleResp.size() + 1) < foAt && itensSum >= instanceData.waveSizeLB()) {
                 continue;
             }
+
             newAisle = findFeasibleAisle(currentOrder, QuantItens, aisleResp, instanceData);
             if (newAisle == -1){
                 continue;
@@ -156,7 +163,7 @@ public class aisleOrderDecoder implements Decoder{
             itensSum += orderItensSum;
             foAt = (foAt + itensSum)/aisleResp.size();
         }
-
+        assert itensSum >= instanceData.waveSizeLB();
         return new ChallengeSolution(
             orderResp,
             aisleResp
