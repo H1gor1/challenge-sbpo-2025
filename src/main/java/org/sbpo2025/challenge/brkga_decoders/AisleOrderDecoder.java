@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
 import org.sbpo2025.challenge.ProblemData;
 
-public class aisleOrderDecoder implements Decoder{
+public class AisleOrderDecoder implements Decoder {
 
     @Override
     public int getRKeysSize(ProblemData instanceData){
@@ -55,7 +55,7 @@ public class aisleOrderDecoder implements Decoder{
     }
 
     /**
-     * Check if an order can be served with the current quantity of items of the all current aisles used.
+     * Checks if an order can be served with the current quantity of items from all currently used aisles.
      * @param orderIndex The index of the order to be checked.
      * @param QuantItens The vetor that contains the sum of all items of the aisles that still was not used
      * @param instanceData The data of the current problem instance provided for solving it.
@@ -80,7 +80,7 @@ public class aisleOrderDecoder implements Decoder{
     private void updateQuantItens(int orderIndex, int[] QuantItens, ProblemData instanceData, int newAisle){
         for(int i = 0; i<instanceData.nItems(); i++){
             QuantItens[i] -= instanceData.orders().get(orderIndex).get(i);
-            QuantItens[i] += instanceData.orders().get(newAisle).get(i);
+            QuantItens[i] += instanceData.aisles().get(newAisle).get(i);
         }
     }
 
@@ -143,12 +143,12 @@ public class aisleOrderDecoder implements Decoder{
                 orderResp.add(currentOrder);
                 updateQuantItens(currentOrder, QuantItens, instanceData);
                 itensSum += instanceData.orders().get(currentOrder).values().stream().mapToInt(Integer::intValue).sum();
-                foAt = (foAt + itensSum)/aisleResp.size();
+                foAt = itensSum/(double)aisleResp.size();
                 continue;
             }
             //otherwise, we need to check if we can find a feasible aisle to serve the order
-            // This if statement checks if it's advantageous to add a new aisle to make the current order servable,
-            // but only if the quantity of items already satisfies the lower bound constraint.
+            // This condition checks whether adding a new aisle is beneficial to make the current order servable,
+            // but only if the current item quantity satisfies the lower bound constraint.
             if ((itensSum + orderItensSum) / (double)(aisleResp.size() + 1) < foAt && itensSum >= instanceData.waveSizeLB()) {
                 continue;
             }
