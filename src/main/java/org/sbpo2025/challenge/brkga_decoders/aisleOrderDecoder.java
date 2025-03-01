@@ -120,8 +120,8 @@ public class aisleOrderDecoder implements Decoder{
         HashSet<Integer> aisleResp = new HashSet<>(List.of(aisleKeys.get(0)));
         int itensSum=0;
 
-        int first_aisle = orderKeys.get(0).getRight();
-        int[] QuantItens = instanceData.orders().get(first_aisle).values()
+        int first_aisle = aisleKeys.get(0);
+        int[] QuantItens = instanceData.aisles().get(first_aisle).values()
                                   .stream()
                                   .mapToInt(Integer::intValue)
                                   .toArray();
