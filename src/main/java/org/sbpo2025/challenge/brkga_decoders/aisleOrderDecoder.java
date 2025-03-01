@@ -35,7 +35,7 @@ public class aisleOrderDecoder implements Decoder{
      *         orders will be evaluated, and the second list represents the order in which 
      *         the aisles will be evaluated.
      */
-    private Pair<ArrayList<Pair<Double, Integer>>, ArrayList<Pair<Double, Integer>>> 
+    private Pair<List<Integer>, List<Integer>> 
     calcEvaluatingOrder(List<Double> keys, ProblemData instanceData) {
         
         ArrayList<Pair<Double, Integer>> orderKeys = makeKeyIndexList(
@@ -48,7 +48,10 @@ public class aisleOrderDecoder implements Decoder{
         orderKeys.sort(Comparator.comparingDouble(Pair::getLeft));
         aisleKeys.sort(Comparator.comparingDouble(Pair::getLeft));
 
-        return Pair.of(orderKeys, aisleKeys);
+        return Pair.of(
+            orderKeys.stream().map(Pair::getRight).toList(),
+            aisleKeys.stream().map(Pair::getRight).toList()
+        );
     }
 
     /**
@@ -107,14 +110,14 @@ public class aisleOrderDecoder implements Decoder{
 
     @Override
     public ChallengeSolution decode(List<Double> keys, ProblemData instanceData){
-        Pair<ArrayList<Pair<Double, Integer>>, ArrayList<Pair<Double, Integer>>> evaluatingOrder = calcEvaluatingOrder(
+        Pair<List<Integer>, List<Integer>> evaluatingOrder = calcEvaluatingOrder(
             keys, instanceData
         );
-        ArrayList<Pair<Double, Integer>> orderKeys = evaluatingOrder.getLeft();
-        ArrayList<Pair<Double, Integer>> aisleKeys = evaluatingOrder.getRight();
+        List<Integer> orderKeys = evaluatingOrder.getLeft();
+        List<Integer> aisleKeys = evaluatingOrder.getRight();
 
         HashSet<Integer> orderResp = new HashSet<>();
-        HashSet<Integer> aisleResp = new HashSet<>(List.of(aisleKeys.get(0).getRight()));
+        HashSet<Integer> aisleResp = new HashSet<>(List.of(aisleKeys.get(0)));
         int itensSum=0;
 
         int first_aisle = orderKeys.get(0).getRight();
@@ -128,7 +131,7 @@ public class aisleOrderDecoder implements Decoder{
         double foAt = 0;
         int newAisle;
         for(int i = 0; i < orderKeys.size(); i++){
-            currentOrder = orderKeys.get(i).getRight();
+            currentOrder = orderKeys.get(i);
             orderItensSum = instanceData.orders().get(currentOrder).values().stream().mapToInt(Integer::intValue).sum();
 
             // if the order is currently servable, then we add it to the response
@@ -136,6 +139,7 @@ public class aisleOrderDecoder implements Decoder{
                 orderResp.add(currentOrder);
                 updateQuantItens(currentOrder, QuantItens, instanceData);
                 itensSum += instanceData.orders().get(currentOrder).values().stream().mapToInt(Integer::intValue).sum();
+                foAt = (foAt + itensSum)/aisleResp.size();
                 continue;
             }
             //otherwise, we need to check if we can find a feasible aisle to serve the order
