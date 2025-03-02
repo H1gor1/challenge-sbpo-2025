@@ -1,4 +1,4 @@
-package org.sbpo2025.challenge.brkga_decoders;
+package org.sbpo2025.challenge.Genetic.BrkgaDecoders;
 
 import java.util.List;
 

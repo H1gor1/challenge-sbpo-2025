@@ -1,4 +1,4 @@
-package org.sbpo2025.challenge.brkga_decoders;
+package org.sbpo2025.challenge.Genetic.BrkgaDecoders;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -166,7 +166,8 @@ public class AisleOrderDecoder implements Decoder {
         assert itensSum >= instanceData.waveSizeLB();
         return new ChallengeSolution(
             orderResp,
-            aisleResp
+            aisleResp,
+            foAt
         );
     }
 }
