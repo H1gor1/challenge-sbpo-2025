@@ -1,12 +1,10 @@
-package org.sbpo2025.challenge;
-
-import org.sbpo2025.challenge.brkga_decoders.Decoder;
+import org.sbpo2025.challenge.brkga_decoders.BDecoder;
 
 
 class Genetic{
 
     public Genetic(
-        Decoder brkgaDecoder,
+        BDecoder brkgaDecoder,
         int ngen,
         int psize,
         float tmut,
