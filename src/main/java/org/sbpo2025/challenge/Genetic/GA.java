@@ -18,7 +18,7 @@ import org.sbpo2025.challenge.ProblemData;
 
 class ProdabilityWheel{
 
-    final private Random RANDOM = new Random();
+    final private Random RANDOM;
     final private TreeMap<Double, Integer> probMap;
 
     private TreeMap<Double, Integer> makeProbMap(List<Double> probDist){
@@ -36,8 +36,9 @@ class ProdabilityWheel{
         }
         return map;
     }
-    public ProdabilityWheel(List<Double> probDist){
+    public ProdabilityWheel(List<Double> probDist, Random random){
         probMap = makeProbMap(probDist);
+        RANDOM = random;
     }
     public Integer get(){
         double value = RANDOM.nextDouble();
@@ -103,7 +104,7 @@ public class GA{
     private ProdabilityWheel buildProbWheel(){
         Double SumFitness = pop.stream().mapToDouble(p -> p.getRight().fo()).sum();
         List<Double> fitnesses = pop.stream().map(p -> p.getRight().fo() / SumFitness).collect(Collectors.toList());
-        return new ProdabilityWheel(fitnesses);
+        return new ProdabilityWheel(fitnesses, RANDOM);
     }
     private ArrayList<Pair<List<Double>, ChallengeSolution>> makeCrossOvers(){
         ArrayList<Pair<List<Double>, ChallengeSolution>> newPop = new ArrayList<>();
