@@ -52,14 +52,14 @@ public class GA{
      */
     final private int STATESRANGE = 10;
     final private Random RANDOM = new Random(); 
-    private Decoder brkgaDecoder;
-    private int ngen;
-    private int psize;
-    private Double tmut;
-    private Double pbetterParent;
-    private OpManager<CrossoverInterface> crossOps;
-    private OpManager<MutationInterface> mutOps;
-    private ProblemData instanceData;
+    final private Decoder brkgaDecoder;
+    final private int ngen;
+    final private int psize;
+    final private Double tmut;
+    final private Double pbetterParent;
+    final private OpManager<CrossoverInterface> crossOps;
+    final private OpManager<MutationInterface> mutOps;
+    final private ProblemData instanceData;
 
     private ArrayList<Pair<List<Double>, ChallengeSolution>> pop;
 
@@ -98,9 +98,6 @@ public class GA{
         this.crossOps = crossOps;
         this.mutOps = mutOps;
         this.instanceData = instanceData;
-
-        initializePopulation();
-        pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
     }
 
     private ProdabilityWheel buildProbWheel(){
@@ -141,9 +138,43 @@ public class GA{
     }
     private void makeMutations(){
 
-        
+        final Pair<List<Double>, ChallengeSolution> bestParent = pop.get(0);
+        Double currentState = bestParent.getRight().fo()/STATESRANGE;
+        MutationInterface mutOp = mutOps.getOperator(currentState.intValue());
+
+        ChallengeSolution bestGenerated = null;
+    
+        for(int i = 0; i<pop.size(); i++){
+            if ( RANDOM.nextDouble() < tmut ){
+                mutOp.makeMutation(pop.get(i).getLeft());
+                pop.set(i, Pair.of(
+                    pop.get(i).getLeft(),
+                    brkgaDecoder.decode(pop.get(i).getLeft(), instanceData)
+                ));
+                if ( bestGenerated == null || pop.get(i).getRight().fo() > bestGenerated.fo() ){
+                    bestGenerated = pop.get(i).getRight();
+                }
+            }
+        }
+        if ( bestGenerated == null){
+            return;
+        }
+        Double improvementRate = bestGenerated.fo() / bestParent.getRight().fo();
+        mutOps.feedBack(improvementRate);
     }
     public ChallengeSolution solve(){
-        return null;
+
+        ArrayList<Pair<List<Double>, ChallengeSolution>> children;
+    
+        initializePopulation();
+        pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
+        for ( int cGen = 0; cGen < ngen; cGen++){
+            children  = makeCrossOvers();
+            makeMutations();
+            pop.addAll(children);
+            pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
+            pop = new ArrayList<>(pop.subList(0, psize));
+        }
+        return pop.get(0).getRight();
     }
 }
