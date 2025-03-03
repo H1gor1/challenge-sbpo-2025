@@ -6,8 +6,7 @@ import java.util.Random;
 public class RandomReset implements MutationInterface {
 
     @Override
-    public void makeMutation(List<Double> randomKeys) {
-        Random random = new Random();
+    public void makeMutation(List<Double> randomKeys, Random random) {
         int target = random.nextInt(randomKeys.size());
         randomKeys.set(target, random.nextDouble());
     }

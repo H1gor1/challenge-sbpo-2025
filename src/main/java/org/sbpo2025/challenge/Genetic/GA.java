@@ -121,9 +121,9 @@ public class GA{
             parent2 = pop.get(wheel.get());
 
             if (parent1.getRight().fo() > parent2.getRight().fo()){
-                newChildKeys = crossOp.makeCrossOver(parent1.getLeft(), parent2.getLeft(), pbetterParent);
+                newChildKeys = crossOp.makeCrossOver(parent1.getLeft(), parent2.getLeft(), pbetterParent, RANDOM);
             }else{
-                newChildKeys = crossOp.makeCrossOver(parent2.getLeft(), parent1.getLeft(), pbetterParent);
+                newChildKeys = crossOp.makeCrossOver(parent2.getLeft(), parent1.getLeft(), pbetterParent, RANDOM);
             }
             newChild = Pair.of(
                 newChildKeys,
@@ -146,7 +146,7 @@ public class GA{
     
         for(int i = 0; i<pop.size(); i++){
             if ( RANDOM.nextDouble() < tmut ){
-                mutOp.makeMutation(pop.get(i).getLeft());
+                mutOp.makeMutation(pop.get(i).getLeft(), RANDOM);
                 pop.set(i, Pair.of(
                     pop.get(i).getLeft(),
                     brkgaDecoder.decode(pop.get(i).getLeft(), instanceData)
