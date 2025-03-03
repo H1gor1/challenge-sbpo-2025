@@ -24,8 +24,8 @@ class GA{
     private int psize;
     private Double tmut;
     private Double pbetterParent;
-    private CrossoverInterface crossoverOperator;
-    private MutationInterface mutationOperator;
+    private OpManager<CrossoverInterface> crossOps;
+    private OpManager<MutationInterface> mutOps;
     private ProblemData instanceData;
 
     private ArrayList<Pair<List<Double>, ChallengeSolution>> pop;
@@ -55,16 +55,16 @@ class GA{
         Double tmut,
         Double pbetterParent,
         ProblemData instanceData,
-        CrossoverInterface crossoverOperator,
-        MutationInterface mutationOperator
+        OpManager<CrossoverInterface> crossOps,
+        OpManager<MutationInterface> mutOps
     ){
         this.brkgaDecoder = brkgaDecoder;
         this.ngen = ngen;
         this.psize = psize;
         this.tmut = tmut;
         this.pbetterParent = pbetterParent;
-        this.crossoverOperator = crossoverOperator;
-        this.mutationOperator = mutationOperator;
+        this.crossOps = crossOps;
+        this.mutOps = mutOps;
         this.instanceData = instanceData;
 
         initializePopulation();
@@ -73,6 +73,7 @@ class GA{
 
     private ArrayList<Pair<List<Double>, ChallengeSolution>> makeCrossOvers(){
         ArrayList<Pair<List<Double>, ChallengeSolution>> newPop = new ArrayList<>();
+        crossOps.getOperator(0);
         return null;
     }
     private void makeMutations(){
