@@ -4,16 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 public class OpManager<Op> {
+    private static final Random RANDOM = new Random();
 
-    final private List<Op> operators;
-    final private HashMap<Integer, List<Double>> opProbabilities = new HashMap<>();
-    final private List<Double> defaultProbabilities;
+    private final List<Op> operators;
+    private final HashMap<Integer, List<Double>> opProbabilities = new HashMap<>();
+    private final List<Double> defaultProbabilities;
     private Pair<Integer, Integer> lastReturned = null;
 
     public OpManager(List<Op> operators) {
@@ -23,46 +25,30 @@ public class OpManager<Op> {
                 .boxed().collect(Collectors.toList());
     }
 
-    private int findBoundedIndex(List<Double> probList, Double value) {
-        int i = 0;
-        int j = probList.size() - 1;
-        int half;
-        while (i < j) {
-            half = (i + j) / 2;
-            if (probList.get(half) < value) {
-                i = half + 1;
-            } else if (probList.get(half) > value) {
-                j = half - 1;
-            } else {
-                return half;
-            }
-        }
-        return i;
-    }
+    private TreeMap<Double, Integer> getProbMap(int state) {
+        List<Double> probList = opProbabilities.computeIfAbsent(state, k -> new ArrayList<>(defaultProbabilities));
 
-    private List<Double> getProbArray(int state) {
-        List<Double> probList = opProbabilities.get(state);
-        if (probList == null) {
-            probList = new ArrayList<>(defaultProbabilities);
-            opProbabilities.put(state, probList);
-        }
+        double Vsum = probList.stream().mapToDouble(Double::doubleValue).sum();
+        final double epsilon = 1e-9;
+        boolean isNormalized = Math.abs(Vsum - 1.0) < epsilon;
 
-        Double Vsum = probList.stream().reduce(0.0, (a, b) -> a + b);
-        List<Double> normalizedProbList = probList.stream().map(p -> p / Vsum).collect(Collectors.toList());
-        
-        List<Double> probVector = new ArrayList<>(List.of(0.0));
-        for (Double prob : normalizedProbList) {
-            probVector.add(probVector.get(probVector.size() - 1) + prob);
+        List<Double> normalizedProbList = isNormalized 
+                ? probList 
+                : probList.stream().map(p -> p / Vsum).collect(Collectors.toList());
+
+        TreeMap<Double, Integer> map = new TreeMap<>();
+        double accumulated = 0.0;
+        for (int i = 0; i < normalizedProbList.size(); i++) {
+            accumulated += normalizedProbList.get(i);
+            map.put(accumulated, i);
         }
-        probVector.set(probVector.size() - 1, 1.0);
-        return probVector;
+        return map;
     }
 
     public Op getOperator(int state) {
-        List<Double> probList = getProbArray(state);
-        Random random = new Random();
-        double value = random.nextDouble();
-        int opIndex = findBoundedIndex(probList, value);
+        TreeMap<Double, Integer> probMap = getProbMap(state);
+        double value = RANDOM.nextDouble();
+        int opIndex = probMap.higherEntry(value).getValue();
         lastReturned = Pair.of(state, opIndex);
         return operators.get(opIndex);
     }
