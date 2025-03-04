@@ -1,12 +1,17 @@
 package org.sbpo2025.challenge;
 
-import org.apache.commons.lang3.time.StopWatch;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.time.StopWatch;
+import org.sbpo2025.challenge.Genetic.BrkgaDecoders.AisleOrderDecoder;
+import org.sbpo2025.challenge.Genetic.CrossOverOperators.UniformCrossOver;
+import org.sbpo2025.challenge.Genetic.GA;
+import org.sbpo2025.challenge.Genetic.MutationOperators.RandomReset;
+import org.sbpo2025.challenge.Genetic.OpManager;
 
 public class ChallengeSolver {
     private final long MAX_RUNTIME = 600000; // milliseconds; 10 minutes
@@ -27,8 +32,18 @@ public class ChallengeSolver {
     }
 
     public ChallengeSolution solve(StopWatch stopWatch) {
-        // Implement your solution here
-        return null;
+        ProblemData instanceData = new ProblemData(orders, aisles, nItems, waveSizeLB, waveSizeUB);
+        GA genetic = new GA(
+            new AisleOrderDecoder(),
+            100,
+            150,
+            0.1,
+            0.4,
+            instanceData,
+            new OpManager<>(List.of(new UniformCrossOver())),
+            new OpManager<>(List.of(new RandomReset()))
+        );
+        return genetic.solve();
     }
 
     /*
