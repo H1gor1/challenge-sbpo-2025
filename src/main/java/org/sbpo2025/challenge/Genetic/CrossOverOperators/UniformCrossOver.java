@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 
-public class UniformCrossOver implements CrossoverInterface{
+public class UniformCrossOver implements CrossOverOp{
 
     @Override
     public List<Double> makeCrossOver(List<Double> bestParent, List<Double> worstFather, Double pBetterParent, Random random) {

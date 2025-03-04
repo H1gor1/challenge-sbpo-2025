@@ -3,7 +3,7 @@ package org.sbpo2025.challenge.Genetic.MutationOperators;
 import java.util.List;
 import java.util.Random;
 
-public interface MutationInterface {
+public interface MutationOp {
 
     /**
      * Should make a mutation in the random keys accordance to the mutation rate.

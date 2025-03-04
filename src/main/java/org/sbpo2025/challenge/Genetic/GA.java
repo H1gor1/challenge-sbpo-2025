@@ -11,8 +11,8 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
 import org.sbpo2025.challenge.Genetic.BrkgaDecoders.Decoder;
-import org.sbpo2025.challenge.Genetic.CrossOverOperators.CrossoverInterface;
-import org.sbpo2025.challenge.Genetic.MutationOperators.MutationInterface;
+import org.sbpo2025.challenge.Genetic.CrossOverOperators.CrossOverOp;
+import org.sbpo2025.challenge.Genetic.MutationOperators.MutationOp;
 import org.sbpo2025.challenge.ProblemData;
 
 
@@ -58,8 +58,8 @@ public class GA{
     final private int psize;
     final private Double tmut;
     final private Double pbetterParent;
-    final private OpManager<CrossoverInterface> crossOps;
-    final private OpManager<MutationInterface> mutOps;
+    final private OpManager<CrossOverOp> crossOps;
+    final private OpManager<MutationOp> mutOps;
     final private ProblemData instanceData;
 
     private ArrayList<Pair<List<Double>, ChallengeSolution>> pop;
@@ -88,8 +88,8 @@ public class GA{
         Double tmut,
         Double pbetterParent,
         ProblemData instanceData,
-        OpManager<CrossoverInterface> crossOps,
-        OpManager<MutationInterface> mutOps
+        OpManager<CrossOverOp> crossOps,
+        OpManager<MutationOp> mutOps
     ){
         this.brkgaDecoder = brkgaDecoder;
         this.ngen = ngen;
@@ -114,7 +114,7 @@ public class GA{
         // set the current state with base on the best solution FO until now
         final Pair<List<Double>, ChallengeSolution> bestParent = pop.get(0);
         Double currentState = bestParent.getRight().fo()/STATESRANGE;
-        CrossoverInterface crossOp = crossOps.getOperator(currentState.intValue());
+        CrossOverOp crossOp = crossOps.getOperator(currentState.intValue());
 
         ProdabilityWheel wheel = buildProbWheel();
         for(int i = 0; i < psize; i++){
@@ -141,7 +141,7 @@ public class GA{
 
         final Pair<List<Double>, ChallengeSolution> bestParent = pop.get(0);
         Double currentState = bestParent.getRight().fo()/STATESRANGE;
-        MutationInterface mutOp = mutOps.getOperator(currentState.intValue());
+        MutationOp mutOp = mutOps.getOperator(currentState.intValue());
 
         ChallengeSolution bestGenerated = null;
     

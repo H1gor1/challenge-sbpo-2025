@@ -3,7 +3,7 @@ package org.sbpo2025.challenge.Genetic.CrossOverOperators;
 import java.util.List;
 import java.util.Random;
 
-public interface CrossoverInterface {
+public interface CrossOverOp {
 
     /**
      * Should make a crossover between two parents, generating a child random key.
