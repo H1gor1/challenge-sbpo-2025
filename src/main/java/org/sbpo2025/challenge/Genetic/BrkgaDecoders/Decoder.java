@@ -25,7 +25,14 @@ public abstract class Decoder {
      * @param instanceData The data of the current problem instance that was provided to solve it.
      * @return An instance of ChallengeSolution representing a valid solution to the problem.
      */
-    abstract public ChallengeSolution decode(List<Double> keys, ProblemData instanceData);
+    abstract protected ChallengeSolution performDecode(List<Double> keys, ProblemData instanceData);
+
+    public ChallengeSolution decode(List<Double> keys, ProblemData instanceData){
+        if ( keys.size() != getRKeysSize(instanceData) ){
+            throw new IllegalArgumentException("The number of keys is not the expected.");
+        }
+        return performDecode(keys, instanceData);
+    }
 
     protected  ArrayList<Pair<Double, Integer>> makeKeyIndexList(List<Double> keys){
         ArrayList<Pair<Double, Integer>> keyIndexList = new ArrayList<>(keys.size());

@@ -76,7 +76,7 @@ public class FirstFeasibleAisleDecoder extends Decoder {
     }
 
     @Override
-    public ChallengeSolution decode(List<Double> keys, ProblemData instanceData){
+    public ChallengeSolution performDecode(List<Double> keys, ProblemData instanceData){
         Pair<List<Integer>, List<Integer>> evaluatingOrder = calcEvaluatingOrder(
             keys, instanceData
         );

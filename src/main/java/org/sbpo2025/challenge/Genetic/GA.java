@@ -69,7 +69,7 @@ public class GA{
         pop = new ArrayList<>();
         List<Double> currentRandomKeys;
         for(int i = 0; i < psize; i++){
-            currentRandomKeys = IntStream.range(0, psize).mapToDouble(k -> RANDOM.nextDouble())
+            currentRandomKeys = IntStream.range(0, brkgaDecoder.getRKeysSize(instanceData)).mapToDouble(k -> RANDOM.nextDouble())
                                 .boxed()
                                 .collect(Collectors.toList());
             pop.add(
