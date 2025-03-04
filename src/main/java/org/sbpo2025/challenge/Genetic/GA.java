@@ -171,8 +171,8 @@ public class GA{
         pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
         for ( int cGen = 0; cGen < ngen; cGen++){
             children  = makeCrossOvers();
-            makeMutations();
             pop.addAll(children);
+            makeMutations();
             pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
             pop = new ArrayList<>(pop.subList(0, psize));
         }
