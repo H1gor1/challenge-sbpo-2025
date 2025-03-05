@@ -28,7 +28,8 @@ public class FirstFeasibleAisleDecoder extends Decoder {
      *         orders will be evaluated, and the second list represents the order in which 
      *         the aisles will be evaluated.
      */
-    protected Pair<List<Integer>, List<Integer>> 
+    @Override
+    protected List<List<Integer>> 
     calcEvaluatingOrder(List<Double> keys, ProblemData instanceData) {
         
         ArrayList<Pair<Double, Integer>> orderKeys = makeKeyIndexList(
@@ -41,7 +42,7 @@ public class FirstFeasibleAisleDecoder extends Decoder {
         orderKeys.sort(Comparator.comparingDouble(Pair::getLeft));
         aisleKeys.sort(Comparator.comparingDouble(Pair::getLeft));
 
-        return Pair.of(
+        return List.of(
             orderKeys.stream().map(Pair::getRight).toList(),
             aisleKeys.stream().map(Pair::getRight).toList()
         );
@@ -76,12 +77,9 @@ public class FirstFeasibleAisleDecoder extends Decoder {
     }
 
     @Override
-    public ChallengeSolution performDecode(List<Double> keys, ProblemData instanceData){
-        Pair<List<Integer>, List<Integer>> evaluatingOrder = calcEvaluatingOrder(
-            keys, instanceData
-        );
-        List<Integer> orderKeys = evaluatingOrder.getLeft();
-        List<Integer> aisleKeys = evaluatingOrder.getRight();
+    public ChallengeSolution performDecode(List<List<Integer>>  evaluationOrder, ProblemData instanceData){
+        List<Integer> orderKeys = evaluationOrder.get(0);
+        List<Integer> aisleKeys = evaluationOrder.get(1);
 
         HashSet<Integer> orderResp = new HashSet<>();
         HashSet<Integer> aisleResp = new HashSet<>(List.of(aisleKeys.get(0)));

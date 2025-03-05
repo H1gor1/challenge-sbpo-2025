@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
 import org.sbpo2025.challenge.ProblemData;
 
@@ -70,13 +69,10 @@ public class RandomFirstDecoder extends  FirstFeasibleAisleDecoder {
         return new ChallengeSolution(orderResp, aisleResp, foAt);
     }
     @Override
-    public ChallengeSolution performDecode(List<Double> keys, ProblemData instanceData) {
+    public ChallengeSolution performDecode(List<List<Integer>> evaluationOrder, ProblemData instanceData) {
     
-        Pair<List<Integer>, List<Integer>> evaluatingOrder = calcEvaluatingOrder(
-            keys, instanceData
-        );
-        List<Integer> orderKeys = evaluatingOrder.getLeft();
-        List<Integer> aisleKeys = evaluatingOrder.getRight();
+        List<Integer> orderKeys = evaluationOrder.get(0);
+        List<Integer> aisleKeys = evaluationOrder.get(1);
 
         HashSet<Integer> orderResp = new HashSet<>();
         HashSet<Integer> aisleResp = new HashSet<>(List.of(aisleKeys.get(0)));

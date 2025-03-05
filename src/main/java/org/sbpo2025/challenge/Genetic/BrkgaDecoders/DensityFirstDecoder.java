@@ -21,7 +21,7 @@ public class DensityFirstDecoder extends FirstFeasibleAisleDecoder {
      *         e a segunda lista contém a ordem dos corredores.
      */
     @Override
-    protected  Pair<List<Integer>, List<Integer>>
+    protected  List<List<Integer>>
     calcEvaluatingOrder(List<Double> keys, ProblemData instanceData) {
 
         // Criação da lista de chaves para os pedidos (primeira parte das chaves)
@@ -48,9 +48,9 @@ public class DensityFirstDecoder extends FirstFeasibleAisleDecoder {
         orderKeys.sort(Comparator.comparingDouble(Pair::getLeft));
 
         // Retorna as listas de índices dos pedidos e dos corredores ordenados
-        return Pair.of(
-                orderKeys.stream().map(Pair::getRight).toList(),
-                sortedAisleIndices
+        return List.of(
+            orderKeys.stream().map(Pair::getRight).toList(),
+            sortedAisleIndices
         );
     }
 }

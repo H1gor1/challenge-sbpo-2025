@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.sbpo2025.challenge.Genetic.BrkgaDecoders.RandomFirstDecoder;
+import org.sbpo2025.challenge.Genetic.BrkgaDecoders.TripleKeyGreedyDecoder;
 import org.sbpo2025.challenge.Genetic.CrossOverOperators.UniformCrossOver;
 import org.sbpo2025.challenge.Genetic.GA;
 import org.sbpo2025.challenge.Genetic.MutationOperators.RandomReset;
@@ -34,9 +34,9 @@ public class ChallengeSolver {
     public ChallengeSolution solve(StopWatch stopWatch) {
         ProblemData instanceData = new ProblemData(orders, aisles, nItems, waveSizeLB, waveSizeUB);
         GA genetic = new GA(
-            new RandomFirstDecoder(),
-            20000,
-            200,
+            new TripleKeyGreedyDecoder(),
+            1000,
+            1000,
             0.2,
             0.6,
             instanceData,
