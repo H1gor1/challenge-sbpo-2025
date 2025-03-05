@@ -108,8 +108,9 @@ public class GA{
     }
     private ArrayList<Pair<List<Double>, ChallengeSolution>> makeCrossOvers(){
         ArrayList<Pair<List<Double>, ChallengeSolution>> newPop = new ArrayList<>();
-        Pair<List<Double>, ChallengeSolution> parent1, parent2, newChild;
+        Pair<List<Double>, ChallengeSolution> parent1, parent2, newChild, bestChild;
         List<Double> newChildKeys;
+        bestChild = null;
 
         // set the current state with base on the best solution FO until now
         final Pair<List<Double>, ChallengeSolution> bestParent = pop.get(0);
@@ -130,10 +131,12 @@ public class GA{
                 newChildKeys,
                 brkgaDecoder.decode(newChildKeys, instanceData)
             );
+            if ( bestChild == null || newChild.getRight().fo() > bestChild.getRight().fo() ){
+                bestChild = newChild;
+            }
             newPop.add(newChild);
         }
-        newPop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
-        Double improvementRate = newPop.get(0).getRight().fo() / bestParent.getRight().fo();
+        Double improvementRate = bestChild.getRight().fo() / bestParent.getRight().fo();
         crossOps.feedBack(improvementRate);
         return newPop;
     }
@@ -156,9 +159,6 @@ public class GA{
                     bestGenerated = pop.get(i).getRight();
                 }
             }
-        }
-        if ( bestGenerated == null){
-            return;
         }
         Double improvementRate = bestGenerated.fo() / bestParent.getRight().fo();
         mutOps.feedBack(improvementRate);
