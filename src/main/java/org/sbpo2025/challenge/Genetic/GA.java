@@ -117,7 +117,7 @@ public class GA{
         CrossOverOp crossOp = crossOps.getOperator(currentState.intValue());
 
         ProdabilityWheel wheel = buildProbWheel();
-        for(int i = 0; i < psize; i++){
+        for(int i = 0; i < psize/2; i++){
             parent1 = pop.get(wheel.get());
             parent2 = pop.get(wheel.get());
 

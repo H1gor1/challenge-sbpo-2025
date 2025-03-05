@@ -1,10 +1,8 @@
 package org.sbpo2025.challenge.Genetic.BrkgaDecoders;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
 import org.sbpo2025.challenge.ProblemData;
 
@@ -42,14 +40,6 @@ public abstract class Decoder {
         }
         List<List<Integer>> evaluationOrder = calcEvaluatingOrder(keys, instanceData);
         return performDecode(evaluationOrder, instanceData);
-    }
-
-    protected  ArrayList<Pair<Double, Integer>> makeKeyIndexList(List<Double> keys){
-        ArrayList<Pair<Double, Integer>> keyIndexList = new ArrayList<>(keys.size());
-        for(int i = 0; i < keys.size(); i++){
-            keyIndexList.add(Pair.of(keys.get(i), i));
-        }
-        return keyIndexList;
     }
 
     protected boolean isOrderServable(int orderIndex, int[] QuantItens, ProblemData instanceData){

@@ -1,12 +1,12 @@
 package org.sbpo2025.challenge.Genetic.BrkgaDecoders;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
 import org.sbpo2025.challenge.ProblemData;
 
@@ -22,18 +22,20 @@ public class TripleKeyGreedyDecoder extends  Decoder {
         List<Double> orderKeys = keys.subList(0, instanceData.orders().size());
         List<Double> aisleKeys = keys.subList(instanceData.orders().size(), instanceData.orders().size()+instanceData.aisles().size());
         List<Double> qAisleKeys = keys.subList(instanceData.orders().size()+instanceData.aisles().size(), keys.size());
-        ArrayList<Pair<Double, Integer>> orderKeysList = makeKeyIndexList(orderKeys);
-        ArrayList<Pair<Double, Integer>> aisleKeysList = makeKeyIndexList(aisleKeys);
-        ArrayList<Pair<Double, Integer>> qAisleKeysList = makeKeyIndexList(qAisleKeys);
 
-        orderKeysList.sort(Comparator.comparingDouble(Pair::getLeft));
-        aisleKeysList.sort(Comparator.comparingDouble(Pair::getLeft));
-        qAisleKeysList.sort(Comparator.comparingDouble(Pair::getLeft));
+        List<Integer> sortedOrderIndexes = Stream.iterate(0, i -> i + 1).limit(orderKeys.size())
+            .sorted(Comparator.comparing(orderKeys::get))
+            .toList();
+        List<Integer> sortedAisleIndexes = Stream.iterate(0, i -> i + 1).limit(aisleKeys.size())
+            .sorted(Comparator.comparing(aisleKeys::get))
+            .toList();
 
         return List.of(
-            orderKeysList.stream().map(Pair::getRight).toList(),
-            aisleKeysList.stream().map(Pair::getRight).toList(),
-            qAisleKeysList.stream().map(Pair::getRight).toList()
+            sortedOrderIndexes,
+            sortedAisleIndexes,
+            List.of(
+                IntStream.range(0, qAisleKeys.size()).reduce((a, b) -> qAisleKeys.get(a) < qAisleKeys.get(b)?a:b).orElse(0)
+            )
         );
     }
 
@@ -43,54 +45,63 @@ public class TripleKeyGreedyDecoder extends  Decoder {
         int QAisles,
         ProblemData instanceData,
         HashSet<Integer> aisleResp
-    ){
-        for (int i = 0; i<QAisles; i++){
-            for (Map.Entry<Integer, Integer> kv : instanceData.aisles().get(aisleIndexes.get(i)).entrySet()){
+    ) {
+        List<Map<Integer, Integer>> aisles = instanceData.aisles();
+
+        for (int i = 0; i < QAisles; i++) {
+            int aisleIndex = aisleIndexes.get(i);
+            Map<Integer, Integer> aisle = aisles.get(aisleIndex);
+
+            for (Map.Entry<Integer, Integer> kv : aisle.entrySet()) {
                 quantItens[kv.getKey()] += kv.getValue();
             }
-            aisleResp.add(aisleIndexes.get(i));
+
+            aisleResp.add(aisleIndex);
         }
     }
+
     @Override
     protected ChallengeSolution performDecode(List<List<Integer>> evaluationOrder, ProblemData instanceData) {
         List<Integer> orderIndexes = evaluationOrder.get(0);
         List<Integer> aisleIndexes = evaluationOrder.get(1);
         List<Integer> qAisleIndexes = evaluationOrder.get(2);
-        Integer QAisles = qAisleIndexes.get(0)+1;
+        Integer QAisles = qAisleIndexes.get(0) + 1;
+
         HashSet<Integer> orderResp = new HashSet<>();
         HashSet<Integer> aisleResp = new HashSet<>();
 
         int[] QuantItens = new int[instanceData.nItems()];
         countIntialItems(QuantItens, aisleIndexes, QAisles, instanceData, aisleResp);
-
-        int itensSum=0;
-        int orderItens;
-        for( Integer order : orderIndexes){
-            if ( !isOrderServable(order, QuantItens, instanceData) ){
+        
+        int itensSum = 0;
+        int waveSizeUB = instanceData.waveSizeUB();
+        int waveSizeLB = instanceData.waveSizeLB();
+        
+        for (Integer order : orderIndexes) {
+            if (!isOrderServable(order, QuantItens, instanceData)) {
                 continue;
             }
-            orderItens = instanceData.orders().get(order).values().stream().mapToInt(Integer::intValue).sum();
-            if (itensSum + orderItens > instanceData.waveSizeUB()){
+            int orderItens = sumOrderItems(order, instanceData);
+
+            if (itensSum + orderItens > waveSizeUB) {
                 continue;
             }
             itensSum += orderItens;
             updateQuantItens(order, QuantItens, instanceData);
             orderResp.add(order);
         }
-        double fo;
-        if (itensSum < instanceData.waveSizeLB() ){
-            fo = 0.0;
-        }else{
-            fo = itensSum/(double)QAisles;
-        }
-        return new ChallengeSolution(
-            orderResp,
-            aisleResp,
-            fo
-        );
+
+        double fo = (itensSum < waveSizeLB) ? 0.0 : (itensSum / (double) QAisles);
+
+        return new ChallengeSolution(orderResp, aisleResp, fo);
     }
-   
-    
- 
+
+    private int sumOrderItems(Integer order, ProblemData instanceData) {
+        int sum = 0;
+        for (int qty : instanceData.orders().get(order).values()) {
+            sum += qty;
+        }
+        return sum;
+    }
     
 }

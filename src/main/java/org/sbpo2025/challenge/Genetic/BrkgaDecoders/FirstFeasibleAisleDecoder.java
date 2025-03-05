@@ -1,13 +1,12 @@
 package org.sbpo2025.challenge.Genetic.BrkgaDecoders;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
 import org.sbpo2025.challenge.ProblemData;
 
@@ -32,19 +31,19 @@ public class FirstFeasibleAisleDecoder extends Decoder {
     protected List<List<Integer>> 
     calcEvaluatingOrder(List<Double> keys, ProblemData instanceData) {
         
-        ArrayList<Pair<Double, Integer>> orderKeys = makeKeyIndexList(
-            keys.subList(0, instanceData.orders().size())
-        );
-        ArrayList<Pair<Double, Integer>> aisleKeys = makeKeyIndexList(
-            keys.subList(instanceData.orders().size(), keys.size())
-        );
+        List<Double> orderKeys = keys.subList(0, instanceData.orders().size());
+        List<Double> aisleKeys = keys.subList(instanceData.orders().size(), keys.size());
 
-        orderKeys.sort(Comparator.comparingDouble(Pair::getLeft));
-        aisleKeys.sort(Comparator.comparingDouble(Pair::getLeft));
+        List<Integer> sortedOrder = Stream.iterate(0, i -> i +1).limit(orderKeys.size())
+            .sorted(Comparator.comparing(orderKeys::get))
+            .toList();
+        List<Integer> sortedAisle = Stream.iterate(0, i -> i + 1).limit(aisleKeys.size())
+            .sorted(Comparator.comparing(aisleKeys::get))
+            .toList();
 
         return List.of(
-            orderKeys.stream().map(Pair::getRight).toList(),
-            aisleKeys.stream().map(Pair::getRight).toList()
+            sortedOrder,
+            sortedAisle
         );
     }
 
