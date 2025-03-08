@@ -66,7 +66,7 @@ public class RandomFirstDecoder extends  FirstFeasibleAisleDecoder {
                 foAt = itensSum/(double)aisleResp.size();
             }
         }
-        return new ChallengeSolution(orderResp, aisleResp, foAt);
+        return new ChallengeSolution(orderResp, aisleResp, foAt, itensSum);
     }
     @Override
     public ChallengeSolution performDecode(List<List<Integer>> evaluationOrder, ProblemData instanceData) {

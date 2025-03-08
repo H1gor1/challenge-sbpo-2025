@@ -129,7 +129,8 @@ public class FirstFeasibleAisleDecoder extends Decoder {
         return new ChallengeSolution(
             orderResp,
             aisleResp,
-            foAt
+            foAt,
+            itensSum
         );
     }
 }

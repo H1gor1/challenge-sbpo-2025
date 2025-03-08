@@ -61,23 +61,72 @@ public class GA{
     final private OpManager<CrossOverOp> crossOps;
     final private OpManager<MutationOp> mutOps;
     final private ProblemData instanceData;
+    private Double  currentDiversity = 0.0;
+    private ChallengeSolution bestSol = null;
 
     private ArrayList<Pair<List<Double>, ChallengeSolution>> pop;
 
+    private void sumSolutionCharacteristics(List<Double> currentSum, ChallengeSolution sol){
+        List<Double> currentCharacteristics = sol.getSolutionCharacteristics();
+        IntStream.range(0, currentSum.size()).forEach(
+            currentIndex -> currentSum.set(
+                currentIndex, currentCharacteristics.get(currentIndex) + currentSum.get(currentIndex)
+            )
+        );
+    }
 
+    private List<Double> calcCharactersAvarrage(){
+        List<Double> currentSum = pop.get(0).getRight().getSolutionCharacteristics();
+        for(int i = 1; i < pop.size(); i++){
+            sumSolutionCharacteristics(currentSum, pop.get(i).getRight());
+        }
+        currentSum = currentSum.stream().map(v -> v / pop.size()).collect(Collectors.toList());
+        return currentSum;
+    }
+
+    private Double calcCurrentDiversity(){
+        List<Double> currentAvarrage = calcCharactersAvarrage();
+        List<Double> currentCharacteristics;
+        Double result = 0.0;
+        for (Pair<List<Double>, ChallengeSolution> e : pop){
+            currentCharacteristics = e.getRight().getSolutionCharacteristics();
+            for (int i = 0; i < currentAvarrage.size(); i++){
+                result += Math.pow(currentCharacteristics.get(i) - currentAvarrage.get(i), 2.0);
+            }
+        }
+        return result;
+    }
     private void initializePopulation(){
         pop = new ArrayList<>();
         List<Double> currentRandomKeys;
-        for(int i = 0; i < psize; i++){
+        ChallengeSolution currentSol;
+        currentRandomKeys = IntStream.range(0, brkgaDecoder.getRKeysSize(instanceData))
+                            .mapToDouble(k -> RANDOM.nextDouble())
+                            .boxed()
+                            .collect(Collectors.toList());
+        currentSol = brkgaDecoder.decode(currentRandomKeys, instanceData);
+        pop.add(
+            Pair.of(
+                currentRandomKeys,
+                currentSol
+            )
+        );
+        bestSol = currentSol;
+
+        for(int i = 1; i < psize; i++){
             currentRandomKeys = IntStream.range(0, brkgaDecoder.getRKeysSize(instanceData)).mapToDouble(k -> RANDOM.nextDouble())
                                 .boxed()
                                 .collect(Collectors.toList());
+            currentSol = brkgaDecoder.decode(currentRandomKeys, instanceData);
             pop.add(
                 Pair.of(
                     currentRandomKeys,
-                    brkgaDecoder.decode(currentRandomKeys, instanceData)
+                    currentSol
                 )
             );
+            if (currentSol.fo() > bestSol.fo()){
+                bestSol = currentSol;
+            }
         }
     }
 
@@ -134,6 +183,9 @@ public class GA{
             if ( bestChild == null || newChild.getRight().fo() > bestChild.getRight().fo() ){
                 bestChild = newChild;
             }
+            if ( bestSol.fo() < newChild.getRight().fo() ){
+                bestSol = newChild.getRight();
+            }
             newPop.add(newChild);
         }
         Double improvementRate = bestChild.getRight().fo() / bestParent.getRight().fo();
@@ -141,13 +193,8 @@ public class GA{
         return newPop;
     }
     private void makeMutations(){
-
-        final Pair<List<Double>, ChallengeSolution> bestParent = pop.get(0);
-        Double currentState = bestParent.getRight().fo()/STATESRANGE;
-        MutationOp mutOp = mutOps.getOperator(currentState.intValue());
-
-        ChallengeSolution bestGenerated = null;
-    
+        int currentState = currentDiversity.intValue()%pop.size();
+        MutationOp mutOp = mutOps.getOperator(currentState);
         for(int i = 0; i<pop.size(); i++){
             if ( RANDOM.nextDouble() < tmut ){
                 mutOp.makeMutation(pop.get(i).getLeft(), RANDOM);
@@ -155,19 +202,25 @@ public class GA{
                     pop.get(i).getLeft(),
                     brkgaDecoder.decode(pop.get(i).getLeft(), instanceData)
                 ));
-                if ( bestGenerated == null || pop.get(i).getRight().fo() > bestGenerated.fo() ){
-                    bestGenerated = pop.get(i).getRight();
+                if ( bestSol.fo() < pop.get(i).getRight().fo() ){
+                    bestSol = pop.get(i).getRight();
                 }
             }
         }
-        Double improvementRate = bestGenerated.fo() / bestParent.getRight().fo();
-        mutOps.feedBack(improvementRate);
+    }
+
+    private void reportMutationFeedback(){
+        Double newPopDiversity = calcCurrentDiversity();
+        Double MutOpImprovomentRate = newPopDiversity / currentDiversity;
+        mutOps.feedBack(MutOpImprovomentRate);
+        currentDiversity = newPopDiversity;
     }
     public ChallengeSolution solve(){
 
         ArrayList<Pair<List<Double>, ChallengeSolution>> children;
     
         initializePopulation();
+        currentDiversity = calcCurrentDiversity();
         pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
         for ( int cGen = 0; cGen < ngen; cGen++){
             children  = makeCrossOvers();
@@ -175,7 +228,8 @@ public class GA{
             makeMutations();
             pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
             pop = new ArrayList<>(pop.subList(0, psize));
+            reportMutationFeedback();
         }
-        return pop.get(0).getRight();
+        return bestSol;
     }
 }

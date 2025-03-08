@@ -93,7 +93,7 @@ public class TripleKeyGreedyDecoder extends  Decoder {
 
         double fo = (itensSum < waveSizeLB) ? 0.0 : (itensSum / (double) QAisles);
 
-        return new ChallengeSolution(orderResp, aisleResp, fo);
+        return new ChallengeSolution(orderResp, aisleResp, fo, itensSum);
     }
 
     private int sumOrderItems(Integer order, ProblemData instanceData) {
