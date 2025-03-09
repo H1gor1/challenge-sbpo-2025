@@ -58,8 +58,8 @@ public class GA{
     final private int psize;
     final private Double tmut;
     final private Double pbetterParent;
-    final private OpManager<CrossOverOp> crossOps;
-    final private OpManager<MutationOp> mutOps;
+    final private CrossOpManager<CrossOverOp> crossOps;
+    final private MutOpManager mutOps;
     final private ProblemData instanceData;
     private Double  currentDiversity = 0.0;
     private ChallengeSolution bestSol = null;
@@ -137,8 +137,8 @@ public class GA{
         Double tmut,
         Double pbetterParent,
         ProblemData instanceData,
-        OpManager<CrossOverOp> crossOps,
-        OpManager<MutationOp> mutOps
+        CrossOpManager<CrossOverOp> crossOps,
+        MutOpManager mutOps
     ){
         this.brkgaDecoder = brkgaDecoder;
         this.ngen = ngen;
@@ -192,9 +192,8 @@ public class GA{
         crossOps.feedBack(improvementRate);
         return newPop;
     }
-    private void makeMutations(){
-        int currentState = currentDiversity.intValue()%pop.size();
-        MutationOp mutOp = mutOps.getOperator(currentState);
+    private void makeMutations(int currentIteration){
+        MutationOp mutOp = mutOps.getOperator(currentDiversity, currentIteration);
         for(int i = 0; i<pop.size(); i++){
             if ( RANDOM.nextDouble() < tmut ){
                 mutOp.makeMutation(pop.get(i).getLeft(), RANDOM);
@@ -209,26 +208,21 @@ public class GA{
         }
     }
 
-    private void reportMutationFeedback(){
-        Double newPopDiversity = calcCurrentDiversity();
-        Double MutOpImprovomentRate = newPopDiversity / currentDiversity;
-        mutOps.feedBack(MutOpImprovomentRate);
-        currentDiversity = newPopDiversity;
-    }
     public ChallengeSolution solve(){
 
         ArrayList<Pair<List<Double>, ChallengeSolution>> children;
     
         initializePopulation();
         currentDiversity = calcCurrentDiversity();
+        mutOps.setRange(currentDiversity, ngen);
         pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
         for ( int cGen = 0; cGen < ngen; cGen++){
             children  = makeCrossOvers();
             pop.addAll(children);
-            makeMutations();
+            makeMutations(cGen);
             pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
             pop = new ArrayList<>(pop.subList(0, psize));
-            reportMutationFeedback();
+            currentDiversity = calcCurrentDiversity();
         }
         return bestSol;
     }
