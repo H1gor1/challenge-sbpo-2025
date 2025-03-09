@@ -7,14 +7,18 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.sbpo2025.challenge.Genetic.BrkgaDecoders.Decoder;
 import org.sbpo2025.challenge.Genetic.BrkgaDecoders.TripleKeyGreedyDecoder;
+import org.sbpo2025.challenge.Genetic.CrossOpManager;
 import org.sbpo2025.challenge.Genetic.CrossOverOperators.UniformCrossOver;
 import org.sbpo2025.challenge.Genetic.GA;
+import org.sbpo2025.challenge.Genetic.MutOpManager;
 import org.sbpo2025.challenge.Genetic.MutationOperators.CreepMutation;
+import org.sbpo2025.challenge.Genetic.MutationOperators.KeyShuffle;
 import org.sbpo2025.challenge.Genetic.MutationOperators.RandomReset;
 import org.sbpo2025.challenge.Genetic.MutationOperators.RandomSwap;
 import org.sbpo2025.challenge.Genetic.MutationOperators.Reverse;
-import org.sbpo2025.challenge.Genetic.OpManager;
+import org.sbpo2025.challenge.Genetic.MutationOperators.Shift;
 
 public class ChallengeSolver {
     private final long MAX_RUNTIME = 600000; // milliseconds; 10 minutes
@@ -36,28 +40,29 @@ public class ChallengeSolver {
 
     public ChallengeSolution solve(StopWatch stopWatch) {
         ProblemData instanceData = new ProblemData(orders, aisles, nItems, waveSizeLB, waveSizeUB);
+        Decoder decoder = new TripleKeyGreedyDecoder();
         GA genetic = new GA(
-            new TripleKeyGreedyDecoder(),
-            1000,
-            1000,
+            decoder,
+            300,
+            300,
             0.2,
             0.6,
             instanceData,
-            new OpManager<>(List.of(new UniformCrossOver())),
-            new OpManager<>(
-                List.of(
-                    new RandomReset(1),
-                    new RandomReset(2),
-                    new RandomReset(4),
-                    new RandomSwap(1),
-                    new RandomSwap(2),
-                    new RandomSwap(4),
-                    new Reverse(),
-                    new CreepMutation(1),
-                    new CreepMutation(2),
-                    new CreepMutation(4)
-                )
+            new CrossOpManager<>(List.of(new UniformCrossOver())),
+            new MutOpManager(
+            List.of(
+                new RandomReset(0.50),
+                new CreepMutation(0.35),
+                new Reverse(0.20),
+                new KeyShuffle(0.10),
+                new Reverse(0.05),
+                new RandomSwap(0.02),
+                new Shift(0.005),
+                new RandomSwap(0.001)
             )
+        )
+
+
         );
         return genetic.solve();
     }
