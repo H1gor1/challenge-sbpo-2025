@@ -5,16 +5,18 @@ import java.util.Random;
 
 public class RandomReset implements MutationOp {
 
-    final private int diversityLevel;
+    final private double diversityLevel;
 
-    public RandomReset(int diversityLevel) {
+    public RandomReset(double diversityLevel) {
         this.diversityLevel = diversityLevel;
     }
 
     @Override
     public void makeMutation(List<Double> randomKeys, Random random) {
         int target;
-        for (int i = 0; i < diversityLevel; i++) {
+        int sizeMutation = (int) (diversityLevel * randomKeys.size());
+        sizeMutation = Math.max(sizeMutation, 1);
+        for (int i = 0; i < sizeMutation; i++) {
             target = random.nextInt(randomKeys.size());
             randomKeys.set(target, random.nextDouble());
         }
