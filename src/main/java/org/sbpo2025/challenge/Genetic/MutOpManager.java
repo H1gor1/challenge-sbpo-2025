@@ -43,7 +43,7 @@ public class MutOpManager {
         }
 
         int i = currentGen / genRange;
-        int opRange = (int)diversityBase / operatorsMap.get(i).size();
+        int opRange = (int) Math.ceil( diversityBase / operatorsMap.get(i).size());
         int j = (int)(currentDiversity / opRange);
         return operatorsMap.get(i).get(j);
     }
