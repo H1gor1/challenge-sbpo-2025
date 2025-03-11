@@ -5,8 +5,8 @@ import java.util.Random;
 
 public class RandomSwap implements MutationOp{
 
-    final private int diversityLevel;
-    public RandomSwap(int diversityLevel) {
+    final private double diversityLevel;
+    public RandomSwap(double diversityLevel) {
         this.diversityLevel = diversityLevel;
     }
 
@@ -14,7 +14,9 @@ public class RandomSwap implements MutationOp{
     public void makeMutation(List<Double> randomKeys, Random random) {
         int source;
         int target;
-        for (int i = 0; i < diversityLevel; i++) {
+        int sizeMutation = (int) (diversityLevel * randomKeys.size());
+        sizeMutation = Math.max(sizeMutation, 1);
+        for (int i = 0; i < sizeMutation; i++) {
             source = random.nextInt(randomKeys.size());
             target = random.nextInt(randomKeys.size());
             double temp = randomKeys.get(source);
