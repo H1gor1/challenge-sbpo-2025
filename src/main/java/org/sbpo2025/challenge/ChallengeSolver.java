@@ -34,8 +34,9 @@ public class ChallengeSolver {
         ProblemData instanceData = new ProblemData(orders, aisles, nItems, waveSizeLB, waveSizeUB);
         GA genetic = new GA(
             new TripleKeyGreedyDecoder(),
-            1000,
-            1000,
+            300,
+            50,
+            300,
             0.6,
             0.15,
             0.35,
