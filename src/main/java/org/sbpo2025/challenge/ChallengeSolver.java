@@ -10,7 +10,6 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.sbpo2025.challenge.Genetic.BrkgaDecoders.TripleKeyGreedyDecoder;
 import org.sbpo2025.challenge.Genetic.CrossOverOperators.UniformCrossOver;
 import org.sbpo2025.challenge.Genetic.GA;
-import org.sbpo2025.challenge.Genetic.MutationOperators.Reverse;
 import org.sbpo2025.challenge.Genetic.OpManager;
 
 public class ChallengeSolver {
@@ -37,11 +36,11 @@ public class ChallengeSolver {
             new TripleKeyGreedyDecoder(),
             1000,
             1000,
-            0.2,
             0.6,
+            0.15,
+            0.35,
             instanceData,
-            new OpManager<>(List.of(new UniformCrossOver())),
-            new Reverse(0.1)
+            new OpManager<>(List.of(new UniformCrossOver()))
         );
         return genetic.solve();
     }

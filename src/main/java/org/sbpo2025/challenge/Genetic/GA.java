@@ -12,7 +12,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
 import org.sbpo2025.challenge.Genetic.BrkgaDecoders.Decoder;
 import org.sbpo2025.challenge.Genetic.CrossOverOperators.CrossOverOp;
-import org.sbpo2025.challenge.Genetic.MutationOperators.MutationOp;
 import org.sbpo2025.challenge.ProblemData;
 
 
@@ -48,147 +47,129 @@ class ProdabilityWheel{
 }
 public class GA{
 
+
+    final private Random RANDOM = new Random(); 
     /**
      * Algorithm parameters:
      */
-    final private int STATESRANGE = 10;
-    final private Random RANDOM = new Random(); 
-    final private Decoder brkgaDecoder;
+    /*
+     * The fraction of elite, crossover and mutation of individuals in the population.
+     */
+    final private int eliteSize;
+    final private int mutationSize;
+
+    /* The decoder used in GA */
+    final private Decoder brkgaDecoder; 
+
+    /*The number of generations and population size respectively */
     final private int ngen;
     final private int psize;
-    final private Double tmut;
-    final private Double pbetterParent;
+
+    /**
+     * This params are responsible by the crossover behavior of the GA.
+     */
     final private OpManager<CrossOverOp> crossOps;
-    final private MutationOp mutOp;
-    final private ProblemData instanceData;
-    private Double  currentDiversity = 0.0;
-    private ChallengeSolution bestSol = null;
+    final private Double pbetterParent;
+    final private int STATESRANGE = 10;
+
+    final private ProblemData instanceData; // The instance data of the problem
 
     private ArrayList<Pair<List<Double>, ChallengeSolution>> pop;
 
-    private void initializePopulation(){
-        pop = new ArrayList<>();
+    private void generateMutants(ArrayList<Pair<List<Double>, ChallengeSolution>> nextGen, int quantity){
         List<Double> currentRandomKeys;
-        ChallengeSolution currentSol;
-        currentRandomKeys = IntStream.range(0, brkgaDecoder.getRKeysSize(instanceData))
-                            .mapToDouble(k -> RANDOM.nextDouble())
-                            .boxed()
-                            .collect(Collectors.toList());
-        currentSol = brkgaDecoder.decode(currentRandomKeys, instanceData);
-        pop.add(
-            Pair.of(
-                currentRandomKeys,
-                currentSol
-            )
-        );
-        bestSol = currentSol;
-
-        for(int i = 1; i < psize; i++){
-            currentRandomKeys = IntStream.range(0, brkgaDecoder.getRKeysSize(instanceData)).mapToDouble(k -> RANDOM.nextDouble())
-                                .boxed()
-                                .collect(Collectors.toList());
-            currentSol = brkgaDecoder.decode(currentRandomKeys, instanceData);
-            pop.add(
-                Pair.of(
-                    currentRandomKeys,
-                    currentSol
-                )
-            );
-            if (currentSol.fo() > bestSol.fo()){
-                bestSol = currentSol;
-            }
+        ChallengeSolution currentSolution;
+        for(int i = 0; i < quantity; i++){
+        
+            currentRandomKeys = IntStream.range(0, brkgaDecoder.getRKeysSize(instanceData))
+                .mapToDouble(k -> RANDOM.nextDouble())
+                .boxed()
+                .collect(Collectors.toList());
+            currentSolution = brkgaDecoder.decode(currentRandomKeys, instanceData);
+            nextGen.add(Pair.of(currentRandomKeys, currentSolution));
         }
     }
 
+    /**
+     * Construct an instance of GA to solve the problem of optimal suborder selection
+
+     * @param brkgaDecoder The decoder responsible for decode a list of random keys to a concrete solution of problem instance
+     * @param ngen the number of generations that the GA will be simulated
+     * @param psize The size of population
+     * @param pbetterParent The prodability of the key will be inherited from the best parent
+     * @param eliteFraction The fraction of the population that should be considered as elite
+     * @param mutationFraction The factorial of the population that should be replace by random individuals in each generation
+     * @param instanceData The instance data of the problem
+     * @param crossOps The manager of crossOver operators
+     */
     public GA(
         Decoder brkgaDecoder,
         int ngen,
         int psize,
-        Double tmut,
         Double pbetterParent,
+        Double eliteFraction,
+        Double mutationFraction,
         ProblemData instanceData,
-        OpManager<CrossOverOp> crossOps,
-        MutationOp mutOp
+        OpManager<CrossOverOp> crossOps
     ){
+        if (eliteFraction + mutationFraction >= 1.0){
+            throw new IllegalArgumentException("The sum of eliteFraction and mutationFraction must be less than 1.0");
+        }
+        if ( pbetterParent >= 1.0 ){
+            throw new IllegalArgumentException("The pbetterParent must be less than 1.0");
+        }
         this.brkgaDecoder = brkgaDecoder;
         this.ngen = ngen;
         this.psize = psize;
-        this.tmut = tmut;
         this.pbetterParent = pbetterParent;
         this.crossOps = crossOps;
-        this.mutOp = mutOp;
         this.instanceData = instanceData;
+        this.eliteSize = (int)(psize * eliteFraction);
+        this.mutationSize = (int)(psize * mutationFraction);
+
+        pop = new ArrayList<>();
     }
 
-    private ProdabilityWheel buildProbWheel(){
-        Double SumFitness = pop.stream().mapToDouble(p -> p.getRight().fo()).sum();
-        List<Double> fitnesses = pop.stream().map(p -> p.getRight().fo() / SumFitness).collect(Collectors.toList());
+    private ProdabilityWheel buildProbWheel(int from, int to){
+        Double SumFitness = pop.subList(from, to).stream().mapToDouble(p -> p.getRight().fo()).sum();
+        List<Double> fitnesses = pop.subList(from, to).stream().map(p -> p.getRight().fo() / SumFitness).collect(Collectors.toList());
         return new ProdabilityWheel(fitnesses, RANDOM);
     }
-    private ArrayList<Pair<List<Double>, ChallengeSolution>> makeCrossOvers(){
-        ArrayList<Pair<List<Double>, ChallengeSolution>> newPop = new ArrayList<>();
-        Pair<List<Double>, ChallengeSolution> parent1, parent2, newChild, bestChild;
-        List<Double> newChildKeys;
-        bestChild = null;
-
-        // set the current state with base on the best solution FO until now
-        final Pair<List<Double>, ChallengeSolution> bestParent = pop.get(0);
-        Double currentState = bestParent.getRight().fo()/STATESRANGE;
-        CrossOverOp crossOp = crossOps.getOperator(currentState.intValue());
-
-        ProdabilityWheel wheel = buildProbWheel();
-        for(int i = 0; i < psize/2; i++){
-            parent1 = pop.get(wheel.get());
-            parent2 = pop.get(wheel.get());
-
-            if (parent1.getRight().fo() > parent2.getRight().fo()){
-                newChildKeys = crossOp.makeCrossOver(parent1.getLeft(), parent2.getLeft(), pbetterParent, RANDOM);
-            }else{
-                newChildKeys = crossOp.makeCrossOver(parent2.getLeft(), parent1.getLeft(), pbetterParent, RANDOM);
-            }
-            newChild = Pair.of(
-                newChildKeys,
-                brkgaDecoder.decode(newChildKeys, instanceData)
-            );
-            if ( bestChild == null || newChild.getRight().fo() > bestChild.getRight().fo() ){
-                bestChild = newChild;
-            }
-            if ( bestSol.fo() < newChild.getRight().fo() ){
-                bestSol = newChild.getRight();
-            }
-            newPop.add(newChild);
-        }
-        Double improvementRate = bestChild.getRight().fo() / bestParent.getRight().fo();
-        crossOps.feedBack(improvementRate);
-        return newPop;
-    }
-    private void makeMutations(){
-        for(int i = 0; i<pop.size(); i++){
-            if ( RANDOM.nextDouble() < tmut ){
-                mutOp.makeMutation(pop.get(i).getLeft(), RANDOM);
-                pop.set(i, Pair.of(
-                    pop.get(i).getLeft(),
-                    brkgaDecoder.decode(pop.get(i).getLeft(), instanceData)
-                ));
-                if ( bestSol.fo() < pop.get(i).getRight().fo() ){
-                    bestSol = pop.get(i).getRight();
-                }
-            }
+    private void makeCrossOvers(ArrayList<Pair<List<Double>, ChallengeSolution>> nextPop, int quantity){
+        ProdabilityWheel eliteWheel = buildProbWheel(0, eliteSize);
+        ProdabilityWheel nonEliteWheel = buildProbWheel(eliteSize, psize);
+        
+        Pair<List<Double>, ChallengeSolution> bestParent;
+        Pair<List<Double>, ChallengeSolution> worstParent;
+        List<Double> childKeys;
+        ChallengeSolution bestSol = pop.get(0).getRight();
+        CrossOverOp crossOp = crossOps.getOperator((int)(bestSol.fo()/STATESRANGE));
+        for(int i = 0; i < quantity; i++){
+            bestParent = pop.get(eliteWheel.get());
+            worstParent = pop.get(eliteSize +  nonEliteWheel.get());
+            assert bestParent.getRight().fo() >= worstParent.getRight().fo();
+            childKeys = crossOp.makeCrossOver(bestParent.getLeft(), worstParent.getLeft(), pbetterParent, RANDOM);
+            nextPop.add(Pair.of(
+                childKeys,
+                brkgaDecoder.decode(childKeys, instanceData)
+            ));
+            
         }
     }
     public ChallengeSolution solve(){
 
-        ArrayList<Pair<List<Double>, ChallengeSolution>> children;
+        ArrayList<Pair<List<Double>, ChallengeSolution>> newPop;
     
-        initializePopulation();
+        generateMutants(pop, psize);
         pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
         for ( int cGen = 0; cGen < ngen; cGen++){
-            children  = makeCrossOvers();
-            pop.addAll(children);
+            newPop = new ArrayList<>(pop.subList(0, eliteSize));
+            makeCrossOvers(newPop, psize - eliteSize - mutationSize);
+            generateMutants(newPop, mutationSize);
             pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
-            pop = new ArrayList<>(pop.subList(0, psize));
-            makeMutations();
+            pop = newPop;
+  
         }
-        return bestSol;
+        return pop.get(0).getRight();
     }
 }
