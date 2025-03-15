@@ -165,11 +165,13 @@ public class GA{
         ArrayList<Pair<List<Double>, ChallengeSolution>> newPop;
         ArrayList<Pair<List<Double>, ChallengeSolution>> lastPromisingPop;
         ChallengeSolution bestOldPop, bestNewPop;
+        ChallengeSolution bestSol;
 
         int genWithoutImprovement = 0;
     
         generateMutants(pop, psize);
         pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
+        bestSol = pop.get(0).getRight();
         lastPromisingPop = pop;
         for ( int cGen = 0; cGen < ngen; cGen++){
             newPop = new ArrayList<>(pop.subList(0, eliteSize));
@@ -184,7 +186,9 @@ public class GA{
             }else{
                 genWithoutImprovement = 0;
                 lastPromisingPop = pop;
-
+                if (bestNewPop.fo() > bestSol.fo()){
+                    bestSol = bestNewPop;
+                }
             }
             if (genWithoutImprovement == qGenWithoutImprovement){
                 pop = lastPromisingPop;
