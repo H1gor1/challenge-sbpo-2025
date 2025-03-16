@@ -10,7 +10,6 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.sbpo2025.challenge.Genetic.BrkgaDecoders.ThreshouldBasedGreedyDecoder;
 import org.sbpo2025.challenge.Genetic.CrossOverOperators.UniformCrossOver;
 import org.sbpo2025.challenge.Genetic.GA;
-import org.sbpo2025.challenge.Genetic.OpManager;
 
 public class ChallengeSolver {
     private final long MAX_RUNTIME = 600000; // milliseconds; 10 minutes
@@ -34,14 +33,14 @@ public class ChallengeSolver {
         ProblemData instanceData = new ProblemData(orders, aisles, nItems, waveSizeLB, waveSizeUB);
         GA genetic = new GA(
             new ThreshouldBasedGreedyDecoder(),
-            20000,
+            1000,
             100,
-            20000,
+            500,
             0.7,
             0.15,
             0.35,
             instanceData,
-            new OpManager<>(List.of(new UniformCrossOver()))
+            new UniformCrossOver()
         );
         return genetic.solve();
     }
