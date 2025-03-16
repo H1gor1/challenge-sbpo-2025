@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
@@ -22,8 +21,7 @@ class ProdabilityWheel{
 
     private TreeMap<Double, Integer> makeProbMap(List<Double> probDist){
         Double Vsum = probDist.stream().reduce(0.0, (a, b) -> a + b);
-        final double epsilon = 1e-9;
-        boolean isNormalized = Math.abs(Vsum - 1.0) < epsilon;
+        boolean isNormalized = Double.compare(Vsum, 1.0) == 0;
         probDist = isNormalized 
             ? probDist 
             : probDist.stream().map(p -> p / Vsum).collect(Collectors.toList());
@@ -78,11 +76,11 @@ public class GA{
         List<Double> currentRandomKeys;
         ChallengeSolution currentSolution;
         for(int i = 0; i < quantity; i++){
-        
-            currentRandomKeys = IntStream.range(0, brkgaDecoder.getRKeysSize(instanceData))
-                .mapToDouble(k -> RANDOM.nextDouble())
-                .boxed()
-                .collect(Collectors.toList());
+
+            currentRandomKeys = new ArrayList<>();
+            for (int j = 0; j < brkgaDecoder.getRKeysSize(instanceData); j++){
+                currentRandomKeys.add(RANDOM.nextDouble());
+            }
             currentSolution = brkgaDecoder.decode(currentRandomKeys, instanceData);
             nextGen.add(Pair.of(currentRandomKeys, currentSolution));
         }
