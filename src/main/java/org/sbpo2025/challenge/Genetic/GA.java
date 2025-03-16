@@ -69,9 +69,8 @@ public class GA{
     /**
      * This params are responsible by the crossover behavior of the GA.
      */
-    final private OpManager<CrossOverOp> crossOps;
+    final private CrossOverOp crossOp;
     final private Double pbetterParent;
-    final private int STATESRANGE = 10;
 
     final private ProblemData instanceData; // The instance data of the problem
 
@@ -110,7 +109,7 @@ public class GA{
         Double eliteFraction,
         Double mutationFraction,
         ProblemData instanceData,
-        OpManager<CrossOverOp> crossOps
+        CrossOverOp crossOp
     ){
         if (eliteFraction + mutationFraction >= 1.0){
             throw new IllegalArgumentException("The sum of eliteFraction and mutationFraction must be less than 1.0");
@@ -125,7 +124,7 @@ public class GA{
         this.ngen = ngen;
         this.psize = psize;
         this.pbetterParent = pbetterParent;
-        this.crossOps = crossOps;
+        this.crossOp = crossOp;
         this.instanceData = instanceData;
         this.eliteSize = (int)(psize * eliteFraction);
         this.mutationSize = (int)(psize * mutationFraction);
@@ -145,8 +144,6 @@ public class GA{
         Pair<List<Double>, ChallengeSolution> bestParent;
         Pair<List<Double>, ChallengeSolution> worstParent;
         List<Double> childKeys;
-        ChallengeSolution bestSol = oldPop.get(0).getRight();
-        CrossOverOp crossOp = crossOps.getOperator((int)(bestSol.fo()/STATESRANGE));
         for(int i = 0; i < quantity; i++){
             bestParent = oldPop.get(eliteWheel.get());
             worstParent = oldPop.get(eliteSize +  nonEliteWheel.get());
