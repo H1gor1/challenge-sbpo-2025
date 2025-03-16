@@ -14,7 +14,7 @@ public class UniformCrossOver implements CrossOverOp{
             if(random.nextDouble() < pBetterParent){
                 child.add(bestParent.get(i));
             }else{
-                child.add(worstFather.get(i));
+                child.add(worstParent.get(i));
             }
         }
         return child;
