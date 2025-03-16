@@ -192,11 +192,12 @@ public class GA{
             }
             if (genWithoutImprovement == qGenWithoutImprovement){
                 pop = lastPromisingPop;
+                genWithoutImprovement = 0;
             }else{
                 pop = newPop;
             }
   
         }
-        return pop.get(0).getRight();
+        return bestSol;
     }
 }
