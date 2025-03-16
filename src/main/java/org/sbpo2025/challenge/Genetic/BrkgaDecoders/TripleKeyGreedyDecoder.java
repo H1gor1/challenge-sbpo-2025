@@ -34,7 +34,7 @@ public class TripleKeyGreedyDecoder extends  Decoder {
             sortedOrderIndexes,
             sortedAisleIndexes,
             List.of(
-                IntStream.range(0, qAisleKeys.size()).reduce((a, b) -> qAisleKeys.get(a) < qAisleKeys.get(b)?a:b).orElse(0)
+                IntStream.range(0, qAisleKeys.size()).reduce((a, b) -> qAisleKeys.get(a) < qAisleKeys.get(b)?a:b).orElse(0) + 1
             )
         );
     }
@@ -65,7 +65,7 @@ public class TripleKeyGreedyDecoder extends  Decoder {
         List<Integer> orderIndexes = evaluationOrder.get(0);
         List<Integer> aisleIndexes = evaluationOrder.get(1);
         List<Integer> qAisleIndexes = evaluationOrder.get(2);
-        Integer QAisles = qAisleIndexes.get(0) + 1;
+        Integer QAisles = qAisleIndexes.get(0);
 
         HashSet<Integer> orderResp = new HashSet<>();
         HashSet<Integer> aisleResp = new HashSet<>();
