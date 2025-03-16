@@ -15,5 +15,5 @@ public interface CrossOverOp {
      * @param random The random object to generate random numbers.
      * @return The random keys of the child.
      */
-    public List<Double> makeCrossOver(List<Double> bestParent, List<Double> worstFather, Double pBetterParent, Random random);
+    public List<Double> makeCrossOver(List<Double> bestParent, List<Double> worstParent, Double pBetterParent, Random random);
 }
