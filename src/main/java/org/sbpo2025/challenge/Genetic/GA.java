@@ -96,7 +96,7 @@ public class GA{
      * @param eliteFraction The fraction of the population that should be considered as elite
      * @param mutationFraction The factorial of the population that should be replace by random individuals in each generation
      * @param instanceData The instance data of the problem
-     * @param crossOps The manager of crossOver operators
+     * @param crossOp The crossOp that the code should be use to make crossOvers
      */
     public GA(
         Decoder brkgaDecoder,
