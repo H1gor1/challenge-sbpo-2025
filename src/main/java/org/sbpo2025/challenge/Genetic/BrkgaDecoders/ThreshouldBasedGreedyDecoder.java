@@ -26,6 +26,9 @@ public class ThreshouldBasedGreedyDecoder extends TripleKeyGreedyDecoder {
             .filter(index -> Double.compare(orderKeys.get(index), ordersThreshould) < 0).toList();
         List<Integer> aisleIndexes = Stream.iterate(0, i -> i + 1).limit(aisleKeys.size())
             .filter(index -> Double.compare(aisleKeys.get(index), aislesThreshould) < 0).toList();
+        if ( aisleIndexes.isEmpty() ){
+            aisleIndexes = List.of(0);
+        }
         return List.of(orderIndexes, aisleIndexes, List.of(aisleIndexes.size()));
 
     }
