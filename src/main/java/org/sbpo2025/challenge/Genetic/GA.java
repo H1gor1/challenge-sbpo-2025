@@ -143,8 +143,9 @@ public class GA{
         Pair<List<Double>, ChallengeSolution> bestParent;
         Pair<List<Double>, ChallengeSolution> worstParent;
         List<Double> childKeys;
-        ChallengeSolution bestSol = oldPop.get(0).getRight();
-        CrossOverOp crossOp = crossOps.getOperator((int)(bestSol.fo()/STATESRANGE));
+        ChallengeSolution bestSolCurrentGen = oldPop.get(0).getRight();
+        ChallengeSolution bestChild = null;
+        CrossOverOp crossOp = crossOps.getOperator((int)(bestSolCurrentGen.fo()/STATESRANGE));
         for(int i = 0; i < quantity; i++){
             bestParent = oldPop.get(eliteWheel.get());
             worstParent = oldPop.get(eliteSize +  nonEliteWheel.get());
@@ -154,8 +155,12 @@ public class GA{
                 childKeys,
                 brkgaDecoder.decode(childKeys, instanceData)
             ));
+            if ( bestChild == null || bestChild.fo() < nextPop.get(i).getRight().fo()){
+                bestChild = nextPop.get(i).getRight();
+            }
             
         }
+        crossOps.feedBack(bestChild.fo()/bestSolCurrentGen.fo());
     }
     public ChallengeSolution solve(){
 
