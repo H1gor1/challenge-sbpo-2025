@@ -115,7 +115,7 @@ public class GA{
         if ( pbetterParent >= 1.0 ){
             throw new IllegalArgumentException("The pbetterParent must be less than 1.0");
         }
-        if (qGenWithoutImprovement == 0 || qGenWithoutImprovement >= ngen){
+        if (qGenWithoutImprovement <= 0 || qGenWithoutImprovement >= ngen){
             throw new IllegalArgumentException("The qGenWithoutImprovement must be greater than 0 and less than ngen");
         }
         this.brkgaDecoder = brkgaDecoder;
