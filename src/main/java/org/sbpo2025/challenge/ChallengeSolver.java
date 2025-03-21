@@ -49,7 +49,12 @@ public class ChallengeSolver {
                 )
             )
         );
-        return genetic.solve();
+        ChallengeSolution r = genetic.solve();
+        stopWatch.stop();
+        Duration runtime = stopWatch.getDuration();
+        System.out.println("Time taken: " + runtime.toMinutes() + " minutes");
+        System.out.println("FO of the solution found: " + r.fo());
+        return r;
     }
 
     /*
