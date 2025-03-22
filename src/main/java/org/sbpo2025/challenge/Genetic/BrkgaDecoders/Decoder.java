@@ -34,7 +34,7 @@ public abstract class Decoder {
      */
     abstract protected ChallengeSolution performDecode(List<List<Integer>> evaluationOrder, ProblemData instanceData);
 
-    public ChallengeSolution decode(List<Double> keys, ProblemData instanceData){
+    final public ChallengeSolution decode(List<Double> keys, ProblemData instanceData){
         if ( keys.size() != getRKeysSize(instanceData) ){
             throw new IllegalArgumentException("The number of keys is not the expected.");
         }
