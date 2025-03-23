@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,36 +12,6 @@ import org.sbpo2025.challenge.Genetic.BrkgaDecoders.Decoder;
 import org.sbpo2025.challenge.Genetic.CrossOverOperators.CrossOverOp;
 import org.sbpo2025.challenge.ProblemData;
 
-
-class ProdabilityWheel{
-
-    final private Random RANDOM;
-    final private TreeMap<Double, Integer> probMap;
-
-    private TreeMap<Double, Integer> makeProbMap(List<Double> probDist){
-        Double Vsum = probDist.stream().reduce(0.0, (a, b) -> a + b);
-        boolean isNormalized = Double.compare(Vsum, 1.0) == 0;
-        probDist = isNormalized 
-            ? probDist 
-            : probDist.stream().map(p -> p / Vsum).collect(Collectors.toList());
-        TreeMap<Double, Integer> map = new TreeMap<>();
-        double accumulated = 0.0;
-        for (int i = 0; i < probDist.size(); i++) {
-            accumulated += probDist.get(i);
-            map.put(accumulated, i);
-        }
-        return map;
-    }
-    public ProdabilityWheel(List<Double> probDist, Random random){
-        probMap = makeProbMap(probDist);
-        RANDOM = random;
-    }
-    public Integer get(){
-        double value = RANDOM.nextDouble();
-        return probMap.higherEntry(value).getValue();
-    }
-    
-}
 public class GA{
 
 
@@ -130,14 +99,14 @@ public class GA{
 
     }
 
-    private ProdabilityWheel buildProbWheel(List<Pair<List<Double>, ChallengeSolution>> pop, int from, int to){
+    private ProbabilityWheel buildProbWheel(List<Pair<List<Double>, ChallengeSolution>> pop, int from, int to){
         Double SumFitness = pop.subList(from, to).stream().mapToDouble(p -> p.getRight().fo()).sum();
         List<Double> fitnesses = pop.subList(from, to).stream().map(p -> p.getRight().fo() / SumFitness).collect(Collectors.toList());
-        return new ProdabilityWheel(fitnesses, RANDOM);
+        return new ProbabilityWheel(fitnesses, RANDOM);
     }
     private void makeCrossOvers(ArrayList<Pair<List<Double>, ChallengeSolution>> oldPop, ArrayList<Pair<List<Double>, ChallengeSolution>> nextPop, int quantity){
-        ProdabilityWheel eliteWheel = buildProbWheel(oldPop, 0, eliteSize);
-        ProdabilityWheel nonEliteWheel = buildProbWheel(oldPop, eliteSize, psize);
+        ProbabilityWheel eliteWheel = buildProbWheel(oldPop, 0, eliteSize);
+        ProbabilityWheel nonEliteWheel = buildProbWheel(oldPop, eliteSize, psize);
         
         Pair<List<Double>, ChallengeSolution> bestParent;
         Pair<List<Double>, ChallengeSolution> worstParent;
