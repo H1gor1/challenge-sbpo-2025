@@ -28,6 +28,22 @@ public class TestProdabilityWheel {
         double lowerBound = expected - (errorMargin * total);
         double upperBound = expected + (errorMargin * total);
 
+        if (observed < lowerBound){
+            System.err.printf(
+                "the observed value was less than lower bound limit: observed: %d, lowerBound: %f, difference: %f\n",
+                observed,
+                lowerBound,
+                lowerBound - observed
+            );
+        }
+        if (observed > upperBound){
+            System.err.printf(
+                "the observed value was bigger than upper bound limit: observed: %d, upperBound: %f, difference: %f\n",
+                observed,
+                upperBound,
+                observed - upperBound
+            );
+        }
         return observed >= lowerBound && observed <= upperBound;
     }
 }
