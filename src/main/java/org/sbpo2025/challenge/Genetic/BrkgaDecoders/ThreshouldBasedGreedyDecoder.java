@@ -1,7 +1,7 @@
 package org.sbpo2025.challenge.Genetic.BrkgaDecoders;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.sbpo2025.challenge.ProblemData;
 
@@ -22,10 +22,16 @@ public class ThreshouldBasedGreedyDecoder extends TripleKeyGreedyDecoder {
             2 + instanceData.orders().size(), 
             2 + instanceData.orders().size()+instanceData.aisles().size()
         );
-        List<Integer> orderIndexes = Stream.iterate(0, i -> i + 1).limit(orderKeys.size())
-            .filter(index -> Double.compare(orderKeys.get(index), ordersThreshould) < 0).toList();
-        List<Integer> aisleIndexes = Stream.iterate(0, i -> i + 1).limit(aisleKeys.size())
-            .filter(index -> Double.compare(aisleKeys.get(index), aislesThreshould) < 0).toList();
+        List<Integer> orderIndexes = new ArrayList<>();
+        List<Integer> aisleIndexes = new ArrayList<>();
+        for (int i = 0; i < orderKeys.size() || i < aisleKeys.size(); i++) {
+            if ( i < orderKeys.size() && Double.compare(orderKeys.get(i), ordersThreshould) < 0 ){
+                orderIndexes.add(i);
+            }
+            if (i < aisleKeys.size() && Double.compare(aisleKeys.get(i), aislesThreshould) < 0 ){
+                aisleIndexes.add(i);
+            }
+        }
         if ( aisleIndexes.isEmpty() ){
             aisleIndexes = List.of(0);
         }
