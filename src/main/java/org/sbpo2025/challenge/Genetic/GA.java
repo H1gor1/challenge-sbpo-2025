@@ -45,7 +45,7 @@ public class GA{
         ChallengeSolution currentSolution;
         for(int i = 0; i < quantity; i++){
 
-            currentRandomKeys = new ArrayList<>();
+            currentRandomKeys = new ArrayList<>(brkgaDecoder.getRKeysSize(instanceData));
             for (int j = 0; j < brkgaDecoder.getRKeysSize(instanceData); j++){
                 currentRandomKeys.add(RANDOM.nextDouble());
             }
@@ -126,7 +126,7 @@ public class GA{
     }
     public ChallengeSolution solve(){
 
-        ArrayList<Pair<List<Double>, ChallengeSolution>> pop = new ArrayList<>();
+        ArrayList<Pair<List<Double>, ChallengeSolution>> pop = new ArrayList<>(psize);
         ArrayList<Pair<List<Double>, ChallengeSolution>> newPop;
         ArrayList<Pair<List<Double>, ChallengeSolution>> lastPromisingPop;
         ChallengeSolution bestOldPop, bestNewPop;
@@ -140,6 +140,7 @@ public class GA{
         lastPromisingPop = pop;
         for ( int cGen = 0; cGen < ngen; cGen++){
             newPop = new ArrayList<>(pop.subList(0, eliteSize));
+            newPop.ensureCapacity(psize);
             makeCrossOvers(pop, newPop, psize - eliteSize - mutationSize);
             generateMutants(newPop, mutationSize);
             newPop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());

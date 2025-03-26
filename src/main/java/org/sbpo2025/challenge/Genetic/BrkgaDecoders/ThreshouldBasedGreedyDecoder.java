@@ -25,8 +25,8 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
             2 + instanceData.orders().size(), 
             2 + instanceData.orders().size()+instanceData.aisles().size()
         );
-        List<Integer> orderIndexes = new ArrayList<>();
-        List<Integer> aisleIndexes = new ArrayList<>();
+        List<Integer> orderIndexes = new ArrayList<>(orderKeys.size());
+        List<Integer> aisleIndexes = new ArrayList<>(aisleKeys.size());
         for (int i = 0; i < orderKeys.size() || i < aisleKeys.size(); i++) {
             if ( i < orderKeys.size() && Double.compare(orderKeys.get(i), ordersThreshould) < 0 ){
                 orderIndexes.add(i);
@@ -70,8 +70,8 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         List<Integer> qAisleIndexes = evaluationOrder.get(2);
         Integer QAisles = qAisleIndexes.get(0);
 
-        HashSet<Integer> orderResp = new HashSet<>();
-        HashSet<Integer> aisleResp = new HashSet<>();
+        HashSet<Integer> orderResp = new HashSet<>(instanceData.orders().size());
+        HashSet<Integer> aisleResp = new HashSet<>(QAisles);
 
         int[] QuantItens = new int[instanceData.nItems()];
         countIntialItems(QuantItens, aisleIndexes, QAisles, instanceData, aisleResp);
