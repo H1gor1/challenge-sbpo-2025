@@ -10,9 +10,10 @@ import org.sbpo2025.challenge.ProblemData;
 
 public class ThreshouldBasedGreedyDecoder extends Decoder {
 
+    private final int thresholdKeysQuantity = 2;
     @Override
     public int getRKeysSize(ProblemData instanceData) {
-        return 2 + instanceData.orders().size() + instanceData.aisles().size();
+        return thresholdKeysQuantity + instanceData.orders().size() + instanceData.aisles().size();
     }
     @Override
     protected List<List<Integer>> calcEvaluatingOrder(List<Double> keys, ProblemData instanceData) {
@@ -20,10 +21,10 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         Double aislesThreshould = keys.get(0);
         Double ordersThreshould = keys.get(1);
 
-        List<Double> orderKeys = keys.subList(2, 2 + instanceData.orders().size());
+        List<Double> orderKeys = keys.subList(thresholdKeysQuantity, thresholdKeysQuantity + instanceData.orders().size());
         List<Double> aisleKeys = keys.subList(
-            2 + instanceData.orders().size(), 
-            2 + instanceData.orders().size()+instanceData.aisles().size()
+            thresholdKeysQuantity + instanceData.orders().size(), 
+            thresholdKeysQuantity + instanceData.orders().size()+instanceData.aisles().size()
         );
         List<Integer> orderIndexes = new ArrayList<>(orderKeys.size());
         List<Integer> aisleIndexes = new ArrayList<>(aisleKeys.size());
