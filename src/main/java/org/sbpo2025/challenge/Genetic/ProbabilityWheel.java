@@ -30,7 +30,7 @@ public class ProbabilityWheel <T>{
     }
 
     public ProbabilityWheel(List<T> elements, Function<T, Double> valueGetter, Random random) {
-        Double sum = elements.stream().mapToDouble((e) -> valueGetter.apply(e)).sum();
+        Double sum = elements.stream().mapToDouble(valueGetter::apply).sum();
         this.pList = makeProbMap(elements, valueGetter, sum);
         this.elements = elements;
         this.RANDOM = random;
