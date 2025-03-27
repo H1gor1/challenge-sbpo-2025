@@ -97,7 +97,7 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
 
         double fo = (itensSum < waveSizeLB) ? 0.0 : (itensSum / (double) QAisles);
 
-        return new ChallengeSolution(orderResp, aisleResp, fo, itensSum);
+        return new ChallengeSolution(orderResp, aisleResp, fo);
     }
 
     private int sumOrderItems(Integer order, ProblemData instanceData) {
