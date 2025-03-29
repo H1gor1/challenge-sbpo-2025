@@ -36,7 +36,7 @@ public class ChallengeSolver {
         GA genetic = new GA(
             new ThreshouldBasedGreedyDecoder(),
             new UniformCrossOver(),
-            cores,
+            cores*2,
             1000,
             150,
             500,
