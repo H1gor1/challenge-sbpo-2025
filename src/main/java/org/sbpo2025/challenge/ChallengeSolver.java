@@ -35,11 +35,11 @@ public class ChallengeSolver {
         GA genetic = new GA(
             new ThreshouldBasedGreedyDecoder(),
             1000,
-            100,
+            150,
             500,
             0.7,
             0.15,
-            0.35,
+            0.5,
             instanceData,
             new UniformCrossOver()
         );
