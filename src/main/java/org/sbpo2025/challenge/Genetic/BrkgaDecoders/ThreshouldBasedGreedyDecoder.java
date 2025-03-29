@@ -115,7 +115,8 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
 
     private int sumOrderItems(Integer order, ProblemData instanceData) {
         int sum = 0;
-        for (int qty : instanceData.orders().get(order).values()) {
+        Map<Integer, Integer> orderItems = instanceData.orders().get(order);
+        for (int qty : orderItems.values()) {
             sum += qty;
         }
         return sum;
