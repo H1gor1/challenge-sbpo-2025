@@ -28,13 +28,13 @@ public class ThreadPool {
     }
 
     public void waitAll() {
-        for (Future<?> future : futures) {
-            try {
+        try {
+            for (Future<?> future : futures) {
                 future.get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(1);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
         }
         futures = new LinkedList<>();
     }
