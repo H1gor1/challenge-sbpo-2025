@@ -32,16 +32,18 @@ public class ChallengeSolver {
 
     public ChallengeSolution solve(StopWatch stopWatch) {
         ProblemData instanceData = new ProblemData(orders, aisles, nItems, waveSizeLB, waveSizeUB);
+        int cores = Runtime.getRuntime().availableProcessors();
         GA genetic = new GA(
             new ThreshouldBasedGreedyDecoder(),
+            new UniformCrossOver(),
+            cores,
             1000,
             150,
             500,
             0.7,
             0.15,
             0.5,
-            instanceData,
-            new UniformCrossOver()
+            instanceData
         );
         ChallengeSolution r = genetic.solve();
         stopWatch.stop();
