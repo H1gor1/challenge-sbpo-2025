@@ -28,11 +28,24 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         );
         List<Integer> orderIndexes = new ArrayList<>(orderKeys.size());
         List<Integer> aisleIndexes = new ArrayList<>(aisleKeys.size());
-        for (int i = 0; i < orderKeys.size() || i < aisleKeys.size(); i++) {
-            if ( i < orderKeys.size() && Double.compare(orderKeys.get(i), ordersThreshould) < 0 ){
+        int orderKeysSize = orderKeys.size();
+        int aisleKeysSize = aisleKeys.size();
+        int minKeysSize = Math.min(orderKeysSize, aisleKeysSize);
+        for (int i = 0; i < minKeysSize; i++) {
+            if ( orderKeys.get(i) < ordersThreshould ){
                 orderIndexes.add(i);
             }
-            if (i < aisleKeys.size() && Double.compare(aisleKeys.get(i), aislesThreshould) < 0 ){
+            if ( aisleKeys.get(i) < aislesThreshould ){
+                    aisleIndexes.add(i);
+            }
+        }
+        for (int i = minKeysSize; i < orderKeysSize; i++) {
+            if ( orderKeys.get(i) < ordersThreshould ){
+                orderIndexes.add(i);
+            }
+        }
+        for (int i = minKeysSize; i < aisleKeysSize; i++) {
+            if ( aisleKeys.get(i) < aislesThreshould ){
                 aisleIndexes.add(i);
             }
         }
