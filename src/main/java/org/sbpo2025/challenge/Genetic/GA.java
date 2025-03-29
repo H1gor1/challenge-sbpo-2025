@@ -188,6 +188,7 @@ public class GA{
             }
   
         }
+        threadPool.close();
         return bestSol;
     }
 }
