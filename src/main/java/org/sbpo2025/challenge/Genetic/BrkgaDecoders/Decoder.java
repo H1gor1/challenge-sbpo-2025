@@ -43,7 +43,8 @@ public abstract class Decoder {
     }
 
     protected boolean isOrderServable(int orderIndex, int[] QuantItens, ProblemData instanceData){
-        for (Map.Entry<Integer, Integer> kv : instanceData.orders().get(orderIndex).entrySet()){
+        Map<Integer, Integer> orderItems = instanceData.orders().get(orderIndex);
+        for (Map.Entry<Integer, Integer> kv : orderItems.entrySet()){
             if (QuantItens[kv.getKey()] < kv.getValue()){
                 return false;
             }
@@ -52,22 +53,9 @@ public abstract class Decoder {
     }
 
     protected void updateQuantItens(int orderIndex, int[] QuantItens, ProblemData instanceData){
-        for(Map.Entry<Integer, Integer> kv : instanceData.orders().get(orderIndex).entrySet()){
+        Map<Integer, Integer> orderItems = instanceData.orders().get(orderIndex);
+        for(Map.Entry<Integer, Integer> kv : orderItems.entrySet()){
             QuantItens[kv.getKey()] -= kv.getValue();
-        }
-    }
-
-    protected void updateQuantItens(int orderIndex, int[] QuantItens, ProblemData instanceData, int newAisle){
-        for( Map.Entry<Integer, Integer> kv : instanceData.aisles().get(newAisle).entrySet()){
-            QuantItens[kv.getKey()] += kv.getValue();
-        }
-        for ( Map.Entry<Integer, Integer> kv : instanceData.orders().get(orderIndex).entrySet()){
-            QuantItens[kv.getKey()] -= kv.getValue();
-        }
-    }
-    protected void updateQuantItens(int[] QuantItens, ProblemData instanceData, int newAisle){
-        for(Map.Entry<Integer, Integer> kv : instanceData.aisles().get(newAisle).entrySet()){
-            QuantItens[kv.getKey()] += kv.getValue();
         }
     }
 }

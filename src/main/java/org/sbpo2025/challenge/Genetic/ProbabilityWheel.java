@@ -1,15 +1,15 @@
 package org.sbpo2025.challenge.Genetic;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
-public class ProbabilityWheel {
+public class ProbabilityWheel <T>{
 
     private final Random RANDOM;
-    private final List<Double> pList;
+    private final double[] pList;
+    private final List<T> elements;
 
     /**
      * This method receives a probability distribution and builds a list of 
@@ -17,25 +17,22 @@ public class ProbabilityWheel {
      * @param probDist The probability distribution to be used in the wheel
      * @return A list of accumulated probabilities
      */
-    private List<Double> makeProbMap(List<Double> probDist) {
-        double Vsum = probDist.stream().reduce(0.0, (a, b) -> a + b);
-        boolean isNormalized = Double.compare(Vsum, 1.0) == 0;
+    private double[] makeProbMap(List<T> elements, Function<T, Double> valueGetter, Double sum) {
 
-        List<Double> normalizedProb = isNormalized
-            ? probDist
-            : probDist.stream().map(p -> p / Vsum).collect(Collectors.toList());
-
-        List<Double> probList = new ArrayList<>();
+        double[] probList = new double[elements.size()];
         double accumulated = 0.0;
-        for (double prob : normalizedProb) {
-            accumulated += prob;
-            probList.add(accumulated);
+        for (int i = 0; i < elements.size(); i++) {
+            accumulated += valueGetter.apply(elements.get(i))/sum;
+            probList[i] = accumulated;
         }
+        assert Double.compare(accumulated, 1.0) == 0;
         return probList;
     }
 
-    public ProbabilityWheel(List<Double> probDist, Random random) {
-        this.pList = makeProbMap(probDist);
+    public ProbabilityWheel(List<T> elements, Function<T, Double> valueGetter, Random random) {
+        Double sum = elements.stream().mapToDouble(valueGetter::apply).sum();
+        this.pList = makeProbMap(elements, valueGetter, sum);
+        this.elements = elements;
         this.RANDOM = random;
     }
 
@@ -44,9 +41,9 @@ public class ProbabilityWheel {
      * given in the constructor of the class.
      * @return the selected index
      */
-    public int get() {
+    public T get() {
         double value = RANDOM.nextDouble();
-        int idx = Collections.binarySearch(pList, value);
+        int idx = Arrays.binarySearch(pList, value);
 
         /* This conversion is needed because when the value doesn't exist in the list,  
         the binarySearch method returns `-insertionPoint - 1`, which is a negative number.  
@@ -59,6 +56,6 @@ public class ProbabilityWheel {
         if (idx < 0) {
             idx = -idx - 1;
         }
-        return idx;
+        return elements.get(idx);
     }
 }

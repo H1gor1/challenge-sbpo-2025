@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
@@ -46,7 +45,7 @@ public class GA{
         ChallengeSolution currentSolution;
         for(int i = 0; i < quantity; i++){
 
-            currentRandomKeys = new ArrayList<>();
+            currentRandomKeys = new ArrayList<>(brkgaDecoder.getRKeysSize(instanceData));
             for (int j = 0; j < brkgaDecoder.getRKeysSize(instanceData); j++){
                 currentRandomKeys.add(RANDOM.nextDouble());
             }
@@ -99,21 +98,23 @@ public class GA{
 
     }
 
-    private ProbabilityWheel buildProbWheel(List<Pair<List<Double>, ChallengeSolution>> pop, int from, int to){
-        Double SumFitness = pop.subList(from, to).stream().mapToDouble(p -> p.getRight().fo()).sum();
-        List<Double> fitnesses = pop.subList(from, to).stream().map(p -> p.getRight().fo() / SumFitness).collect(Collectors.toList());
-        return new ProbabilityWheel(fitnesses, RANDOM);
+    private ProbabilityWheel<Pair<List<Double>, ChallengeSolution>> buildProbWheel(
+        List<Pair<List<Double>, ChallengeSolution>> pop,
+        int from,
+        int to
+    ){
+        return new ProbabilityWheel<>(pop.subList(from, to), (e) -> e.getRight().fo(), RANDOM);
     }
     private void makeCrossOvers(ArrayList<Pair<List<Double>, ChallengeSolution>> oldPop, ArrayList<Pair<List<Double>, ChallengeSolution>> nextPop, int quantity){
-        ProbabilityWheel eliteWheel = buildProbWheel(oldPop, 0, eliteSize);
-        ProbabilityWheel nonEliteWheel = buildProbWheel(oldPop, eliteSize, psize);
+        ProbabilityWheel<Pair<List<Double>, ChallengeSolution>> eliteWheel = buildProbWheel(oldPop, 0, eliteSize);
+        ProbabilityWheel<Pair<List<Double>, ChallengeSolution>> nonEliteWheel = buildProbWheel(oldPop, eliteSize, psize);
         
         Pair<List<Double>, ChallengeSolution> bestParent;
         Pair<List<Double>, ChallengeSolution> worstParent;
         List<Double> childKeys;
         for(int i = 0; i < quantity; i++){
-            bestParent = oldPop.get(eliteWheel.get());
-            worstParent = oldPop.get(eliteSize +  nonEliteWheel.get());
+            bestParent = eliteWheel.get();
+            worstParent = nonEliteWheel.get();
             assert bestParent.getRight().fo() >= worstParent.getRight().fo();
             childKeys = crossOp.makeCrossOver(bestParent.getLeft(), worstParent.getLeft(), pbetterParent, RANDOM);
             nextPop.add(Pair.of(
@@ -125,7 +126,7 @@ public class GA{
     }
     public ChallengeSolution solve(){
 
-        ArrayList<Pair<List<Double>, ChallengeSolution>> pop = new ArrayList<>();
+        ArrayList<Pair<List<Double>, ChallengeSolution>> pop = new ArrayList<>(psize);
         ArrayList<Pair<List<Double>, ChallengeSolution>> newPop;
         ArrayList<Pair<List<Double>, ChallengeSolution>> lastPromisingPop;
         ChallengeSolution bestOldPop, bestNewPop;
@@ -139,6 +140,7 @@ public class GA{
         lastPromisingPop = pop;
         for ( int cGen = 0; cGen < ngen; cGen++){
             newPop = new ArrayList<>(pop.subList(0, eliteSize));
+            newPop.ensureCapacity(psize);
             makeCrossOvers(pop, newPop, psize - eliteSize - mutationSize);
             generateMutants(newPop, mutationSize);
             newPop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());

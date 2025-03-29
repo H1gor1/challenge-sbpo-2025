@@ -9,7 +9,7 @@ public class UniformCrossOver implements CrossOverOp{
 
     @Override
     public List<Double> makeCrossOver(List<Double> bestParent, List<Double> worstParent, Double pBetterParent, Random random) {
-        List<Double> child = new ArrayList<>();
+        List<Double> child = new ArrayList<>(bestParent.size());
         for(int i = 0; i < bestParent.size(); i++){
             if(random.nextDouble() < pBetterParent){
                 child.add(bestParent.get(i));

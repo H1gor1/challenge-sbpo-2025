@@ -7,12 +7,12 @@ import org.sbpo2025.challenge.Genetic.ProbabilityWheel;
 public class TestProdabilityWheel {
     public static void main(String[] args) {
         List<Double> probList = List.of(0.2, 0.5, 0.3);
-        ProbabilityWheel pw = new ProbabilityWheel(probList, new Random());
+        ProbabilityWheel<Double> pw = new ProbabilityWheel<>(probList, (e) -> e, new Random());
         int idx[] = new int[probList.size()];
         int total = 1000000;
 
         for (int i = 0; i < total; i++) {
-            idx[pw.get()]++;
+            idx[probList.indexOf(pw.get())]++;
         }
 
         boolean result;
@@ -28,6 +28,22 @@ public class TestProdabilityWheel {
         double lowerBound = expected - (errorMargin * total);
         double upperBound = expected + (errorMargin * total);
 
+        if (observed < lowerBound){
+            System.err.printf(
+                "the observed value was less than lower bound limit: observed: %d, lowerBound: %f, difference: %f\n",
+                observed,
+                lowerBound,
+                lowerBound - observed
+            );
+        }
+        if (observed > upperBound){
+            System.err.printf(
+                "the observed value was bigger than upper bound limit: observed: %d, upperBound: %f, difference: %f\n",
+                observed,
+                upperBound,
+                observed - upperBound
+            );
+        }
         return observed >= lowerBound && observed <= upperBound;
     }
 }
