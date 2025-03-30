@@ -1,6 +1,7 @@
 package org.sbpo2025.challenge.Genetic;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -10,8 +11,8 @@ import org.sbpo2025.challenge.ChallengeSolution;
 import org.sbpo2025.challenge.Genetic.BrkgaDecoders.Decoder;
 import org.sbpo2025.challenge.Genetic.CrossOverOperators.CrossOverOp;
 import org.sbpo2025.challenge.ProblemData;
-import org.sbpo2025.challenge.ThreadPoolController.OneParamRunnable;
 import org.sbpo2025.challenge.ThreadPoolController.ThreadPool;
+import org.sbpo2025.challenge.ThreadPoolController.TwoParamRunnable;
 
 
 
@@ -46,22 +47,38 @@ public class GA{
      * The controller of the pool of threads that the GA can use
      */
     final private ThreadPool threadPool;
+    final private int maxRunningThreads;
+
     final private ProblemData instanceData; // The instance data of the problem
 
-    private void generateMutants(ArrayList<Pair<List<Double>, ChallengeSolution>> nextGen, int quantity){
-        OneParamRunnable<Integer> mutationTask;
-        for ( int i = 0; i < quantity; i++ ){
-            mutationTask = new OneParamRunnable<>(nextGen.size(), ( param ) -> {
-                List<Double> currentRandomKeys = new ArrayList<>(brkgaDecoder.getRKeysSize(instanceData));
-                for (int j = 0; j < brkgaDecoder.getRKeysSize(instanceData); j++){
-                    currentRandomKeys.add(RANDOM.nextDouble());
+    private void generateMutants(List<Pair<List<Double>, ChallengeSolution>> nextGen, int quantity){
+        TwoParamRunnable<Integer, Integer> mutationTask;
+        Integer from;
+        Integer to;
+        int previousSize = nextGen.size();
+        int increment = quantity/maxRunningThreads + 1;
+        for ( int i = 0; i < quantity; i+=increment ){
+            from = previousSize+i;
+            to = previousSize + Math.min(i + increment, quantity);
+
+            mutationTask = new TwoParamRunnable<>(from, to, ( pFrom, pTo ) -> {
+                List<Double> currentRandomKeys;
+                ChallengeSolution decodedSol;
+                for (;pFrom < pTo; pFrom++ ){
+                    currentRandomKeys = new ArrayList<>(brkgaDecoder.getRKeysSize(instanceData));
+                    for (int j = 0; j < brkgaDecoder.getRKeysSize(instanceData); j++){
+                        currentRandomKeys.add(RANDOM.nextDouble());
+                    }
+                    decodedSol = brkgaDecoder.decode(currentRandomKeys, instanceData);
+                    synchronized (nextGen){
+                        nextGen.add(Pair.of(
+                            currentRandomKeys,
+                            decodedSol
+                        ));
+                    }
+                    
                 }
-                nextGen.set(param, Pair.of(
-                    currentRandomKeys,
-                    brkgaDecoder.decode(currentRandomKeys, instanceData)
-                ));
             });
-            nextGen.add(null);
             threadPool.submit(mutationTask);
         }
     }
@@ -101,6 +118,7 @@ public class GA{
             throw new IllegalArgumentException("The qGenWithoutImprovement must be greater than 0 and less than ngen");
         }
         this.threadPool = new ThreadPool(maxRunningThreads);
+        this.maxRunningThreads = maxRunningThreads;
         this.brkgaDecoder = brkgaDecoder;
         this.ngen = ngen;
         this.psize = psize;
@@ -120,37 +138,48 @@ public class GA{
     ){
         return new ProbabilityWheel<>(pop.subList(from, to), (e) -> e.getRight().fo(), RANDOM);
     }
-    private void makeCrossOvers(ArrayList<Pair<List<Double>, ChallengeSolution>> oldPop, ArrayList<Pair<List<Double>, ChallengeSolution>> nextPop, int quantity){
+    private void makeCrossOvers(List<Pair<List<Double>, ChallengeSolution>> oldPop, List<Pair<List<Double>, ChallengeSolution>> nextPop, int quantity){
         final ProbabilityWheel<Pair<List<Double>, ChallengeSolution>> eliteWheel = buildProbWheel(oldPop, 0, eliteSize);
         final ProbabilityWheel<Pair<List<Double>, ChallengeSolution>> nonEliteWheel = buildProbWheel(oldPop, eliteSize, psize);
-        OneParamRunnable<Integer> crossOverTask;
+        TwoParamRunnable<Integer, Integer> crossOverTask;
+        Integer from;
+        Integer to;
+        int previousSize = nextPop.size();
+        int increment = quantity/maxRunningThreads + 1;
 
-        for (int i = 0; i < quantity; i++ ){
+        for (int i = 0; i < quantity; i+=increment ){
+            from = previousSize+i;
+            to = previousSize+Math.min(i + increment, quantity);
 
-            crossOverTask = new OneParamRunnable<>(
-                nextPop.size(),
-                ( param ) -> {
+            crossOverTask = new TwoParamRunnable<>(
+                from, to,
+                ( pFrom, pTo ) -> {
                     Pair<List<Double>, ChallengeSolution> bestParent;
                     Pair<List<Double>, ChallengeSolution> worstParent;
+                    ChallengeSolution decodedSol;
                     List<Double> childKeys;
-                    bestParent = eliteWheel.get();
-                    worstParent = nonEliteWheel.get();
-                    childKeys = crossOp.makeCrossOver(bestParent.getLeft(), worstParent.getLeft(), pbetterParent, RANDOM);
-                    nextPop.set(param, Pair.of(
-                        childKeys,
-                        brkgaDecoder.decode(childKeys, instanceData)
-                    ));
+                    for(;pFrom < pTo; pFrom++){
+                        bestParent = eliteWheel.get();
+                        worstParent = nonEliteWheel.get();
+                        childKeys = crossOp.makeCrossOver(bestParent.getLeft(), worstParent.getLeft(), pbetterParent, RANDOM);
+                        decodedSol = brkgaDecoder.decode(childKeys, instanceData);
+                        synchronized (nextPop){
+                            nextPop.add(Pair.of(
+                                childKeys,
+                                decodedSol
+                            ));   
+                        }
+                    }
                 }
             );
-            nextPop.add(null);
             threadPool.submit(crossOverTask);
         }
     }
     public ChallengeSolution solve(){
 
-        ArrayList<Pair<List<Double>, ChallengeSolution>> pop = new ArrayList<>(psize);
-        ArrayList<Pair<List<Double>, ChallengeSolution>> newPop;
-        ArrayList<Pair<List<Double>, ChallengeSolution>> lastPromisingPop;
+        List<Pair<List<Double>, ChallengeSolution>> pop = Collections.synchronizedList(new ArrayList<>(psize));
+        List<Pair<List<Double>, ChallengeSolution>> newPop;
+        List<Pair<List<Double>, ChallengeSolution>> lastPromisingPop;
         ChallengeSolution bestOldPop, bestNewPop;
         ChallengeSolution bestSol;
 
@@ -162,8 +191,8 @@ public class GA{
         bestSol = pop.get(0).getRight();
         lastPromisingPop = pop;
         for ( int cGen = 0; cGen < ngen; cGen++){
-            newPop = new ArrayList<>(pop.subList(0, eliteSize));
-            newPop.ensureCapacity(psize);
+            newPop = new ArrayList<>(psize);
+            newPop.addAll(pop.subList(0, eliteSize));
             makeCrossOvers(pop, newPop, psize - eliteSize - mutationSize);
             generateMutants(newPop, mutationSize);
             threadPool.waitAll();
