@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.sbpo2025.challenge.ChallengeSolution;
@@ -18,8 +18,6 @@ import org.sbpo2025.challenge.ThreadPoolController.TwoParamRunnable;
 
 public class GA{
 
-
-    final private Random RANDOM = new Random(); 
     /**
      * Algorithm parameters:
      */
@@ -62,6 +60,7 @@ public class GA{
             to = previousSize + Math.min(i + increment, quantity);
 
             mutationTask = new TwoParamRunnable<>(from, to, ( pFrom, pTo ) -> {
+                final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
                 List<Double> currentRandomKeys;
                 ChallengeSolution decodedSol;
                 for (;pFrom < pTo; pFrom++ ){
@@ -136,7 +135,7 @@ public class GA{
         int from,
         int to
     ){
-        return new ProbabilityWheel<>(pop.subList(from, to), (e) -> e.getRight().fo(), RANDOM);
+        return new ProbabilityWheel<>(pop.subList(from, to), (e) -> e.getRight().fo(), ThreadLocalRandom.current());
     }
     private void makeCrossOvers(List<Pair<List<Double>, ChallengeSolution>> oldPop, List<Pair<List<Double>, ChallengeSolution>> nextPop, int quantity){
         final ProbabilityWheel<Pair<List<Double>, ChallengeSolution>> eliteWheel = buildProbWheel(oldPop, 0, eliteSize);
@@ -154,6 +153,7 @@ public class GA{
             crossOverTask = new TwoParamRunnable<>(
                 from, to,
                 ( pFrom, pTo ) -> {
+                    final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
                     Pair<List<Double>, ChallengeSolution> bestParent;
                     Pair<List<Double>, ChallengeSolution> worstParent;
                     ChallengeSolution decodedSol;
