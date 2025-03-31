@@ -49,7 +49,7 @@ public class GA{
 
     final private ProblemData instanceData; // The instance data of the problem
 
-    private void generateMutants(List<Pair<List<Double>, ChallengeSolution>> nextGen, int quantity){
+    private void generateMutants(List<Pair<double[], ChallengeSolution>> nextGen, int quantity){
         TwoParamRunnable<Integer, Integer> mutationTask;
         int from;
         int to;
@@ -61,12 +61,12 @@ public class GA{
 
             mutationTask = new TwoParamRunnable<>(from, to, ( pFrom, pTo ) -> {
                 final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
-                List<Double> currentRandomKeys;
+                double[] currentRandomKeys;
                 ChallengeSolution decodedSol;
                 for (;pFrom < pTo; pFrom++ ){
-                    currentRandomKeys = new ArrayList<>(brkgaDecoder.getRKeysSize(instanceData));
+                    currentRandomKeys = new double[brkgaDecoder.getRKeysSize(instanceData)];
                     for (int j = 0; j < brkgaDecoder.getRKeysSize(instanceData); j++){
-                        currentRandomKeys.add(RANDOM.nextDouble());
+                        currentRandomKeys[j] = RANDOM.nextDouble();
                     }
                     decodedSol = brkgaDecoder.decode(currentRandomKeys, instanceData);
                     synchronized (nextGen){
@@ -130,16 +130,16 @@ public class GA{
 
     }
 
-    private ProbabilityWheel<Pair<List<Double>, ChallengeSolution>> buildProbWheel(
-        List<Pair<List<Double>, ChallengeSolution>> pop,
+    private ProbabilityWheel<Pair<double[], ChallengeSolution>> buildProbWheel(
+        List<Pair<double[], ChallengeSolution>> pop,
         int from,
         int to
     ){
         return new ProbabilityWheel<>(pop.subList(from, to), (e) -> e.getRight().fo(), ThreadLocalRandom.current());
     }
-    private void makeCrossOvers(List<Pair<List<Double>, ChallengeSolution>> oldPop, List<Pair<List<Double>, ChallengeSolution>> nextPop, int quantity){
-        final ProbabilityWheel<Pair<List<Double>, ChallengeSolution>> eliteWheel = buildProbWheel(oldPop, 0, eliteSize);
-        final ProbabilityWheel<Pair<List<Double>, ChallengeSolution>> nonEliteWheel = buildProbWheel(oldPop, eliteSize, psize);
+    private void makeCrossOvers(List<Pair<double[], ChallengeSolution>> oldPop, List<Pair<double[], ChallengeSolution>> nextPop, int quantity){
+        final ProbabilityWheel<Pair<double[], ChallengeSolution>> eliteWheel = buildProbWheel(oldPop, 0, eliteSize);
+        final ProbabilityWheel<Pair<double[], ChallengeSolution>> nonEliteWheel = buildProbWheel(oldPop, eliteSize, psize);
         TwoParamRunnable<Integer, Integer> crossOverTask;
         Integer from;
         Integer to;
@@ -154,10 +154,10 @@ public class GA{
                 from, to,
                 ( pFrom, pTo ) -> {
                     final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
-                    Pair<List<Double>, ChallengeSolution> bestParent;
-                    Pair<List<Double>, ChallengeSolution> worstParent;
+                    Pair<double[], ChallengeSolution> bestParent;
+                    Pair<double[], ChallengeSolution> worstParent;
                     ChallengeSolution decodedSol;
-                    List<Double> childKeys;
+                    double[] childKeys;
                     for(;pFrom < pTo; pFrom++){
                         bestParent = eliteWheel.get();
                         worstParent = nonEliteWheel.get();
@@ -177,9 +177,9 @@ public class GA{
     }
     public ChallengeSolution solve(){
 
-        List<Pair<List<Double>, ChallengeSolution>> pop = Collections.synchronizedList(new ArrayList<>(psize));
-        List<Pair<List<Double>, ChallengeSolution>> newPop;
-        List<Pair<List<Double>, ChallengeSolution>> lastPromisingPop;
+        List<Pair<double[], ChallengeSolution>> pop = Collections.synchronizedList(new ArrayList<>(psize));
+        List<Pair<double[], ChallengeSolution>> newPop;
+        List<Pair<double[], ChallengeSolution>> lastPromisingPop;
         ChallengeSolution bestOldPop, bestNewPop;
         ChallengeSolution bestSol;
 
@@ -187,7 +187,7 @@ public class GA{
     
         generateMutants(pop, psize);
         threadPool.waitAll();
-        pop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
+        pop.sort(Comparator.comparingDouble((Pair<double[], ChallengeSolution> p) -> p.getRight().fo()).reversed());
         bestSol = pop.get(0).getRight();
         lastPromisingPop = pop;
         for ( int cGen = 0; cGen < ngen; cGen++){
@@ -196,7 +196,7 @@ public class GA{
             makeCrossOvers(pop, newPop, psize - eliteSize - mutationSize);
             generateMutants(newPop, mutationSize);
             threadPool.waitAll();
-            newPop.sort(Comparator.comparingDouble((Pair<List<Double>, ChallengeSolution> p) -> p.getRight().fo()).reversed());
+            newPop.sort(Comparator.comparingDouble((Pair<double[], ChallengeSolution> p) -> p.getRight().fo()).reversed());
     
             bestOldPop = pop.get(0).getRight();
             bestNewPop = newPop.get(0).getRight();

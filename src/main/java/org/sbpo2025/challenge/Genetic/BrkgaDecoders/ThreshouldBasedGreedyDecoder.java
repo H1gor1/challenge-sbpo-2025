@@ -16,44 +16,48 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         return thresholdKeysQuantity + instanceData.orders().size() + instanceData.aisles().size();
     }
     @Override
-    protected List<List<Integer>> calcEvaluatingOrder(List<Double> keys, ProblemData instanceData) {
+    protected List<List<Integer>> calcEvaluatingOrder(double[] keys, ProblemData instanceData) {
 
-        Double aislesThreshould = keys.get(0);
-        Double ordersThreshould = keys.get(1);
+        Double aislesThreshould = keys[0];
+        Double ordersThreshould = keys[1];
 
-        List<Double> orderKeys = keys.subList(thresholdKeysQuantity, thresholdKeysQuantity + instanceData.orders().size());
-        List<Double> aisleKeys = keys.subList(
-            thresholdKeysQuantity + instanceData.orders().size(), 
-            thresholdKeysQuantity + instanceData.orders().size()+instanceData.aisles().size()
-        );
-        List<Integer> orderIndexes = new ArrayList<>(orderKeys.size());
-        List<Integer> aisleIndexes = new ArrayList<>(aisleKeys.size());
-        int orderKeysSize = orderKeys.size();
-        int aisleKeysSize = aisleKeys.size();
-        int minKeysSize = Math.min(orderKeysSize, aisleKeysSize);
-        for (int i = 0; i < minKeysSize; i++) {
-            if ( orderKeys.get(i) < ordersThreshould ){
-                orderIndexes.add(i);
+        int firstOrderIndex = thresholdKeysQuantity;
+        int firstAisleIndex = firstOrderIndex + instanceData.orders().size();
+
+        int orderIndex = firstOrderIndex;
+        int aisleIndex = firstAisleIndex;
+
+        int ordersFinishAt = firstOrderIndex + instanceData.orders().size();
+        int aislesFinishAt = firstAisleIndex + instanceData.aisles().size();
+
+        List<Integer> orderIndexes = new ArrayList<>(instanceData.orders().size());
+        List<Integer> aisleIndexes = new ArrayList<>(instanceData.aisles().size());
+        while ( orderIndex < ordersFinishAt && aisleIndex < aislesFinishAt ){
+            if (keys[orderIndex] < ordersThreshould ){
+                orderIndexes.add(orderIndex - firstOrderIndex);
             }
-            if ( aisleKeys.get(i) < aislesThreshould ){
-                    aisleIndexes.add(i);
+            if (keys[aisleIndex] < aislesThreshould ){
+                aisleIndexes.add(aisleIndex - firstAisleIndex);
             }
+            orderIndex++;
+            aisleIndex++;
         }
-        for (int i = minKeysSize; i < orderKeysSize; i++) {
-            if ( orderKeys.get(i) < ordersThreshould ){
-                orderIndexes.add(i);
+        while (orderIndex < ordersFinishAt){
+            if (keys[orderIndex] < ordersThreshould ){
+                orderIndexes.add(orderIndex - firstOrderIndex);
             }
+            orderIndex++;
         }
-        for (int i = minKeysSize; i < aisleKeysSize; i++) {
-            if ( aisleKeys.get(i) < aislesThreshould ){
-                aisleIndexes.add(i);
+        while (aisleIndex < aislesFinishAt){
+            if (keys[aisleIndex] < aislesThreshould ){
+                aisleIndexes.add(aisleIndex - firstAisleIndex);
             }
+            aisleIndex++;
         }
         if ( aisleIndexes.isEmpty() ){
             aisleIndexes = List.of(0);
         }
         return List.of(orderIndexes, aisleIndexes, List.of(aisleIndexes.size()));
-
     }
 
     private void countIntialItems(

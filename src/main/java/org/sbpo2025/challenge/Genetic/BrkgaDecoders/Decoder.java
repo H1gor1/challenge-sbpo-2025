@@ -23,7 +23,7 @@ public abstract class Decoder {
      * of the some part of the solution
      */
     abstract protected List<List<Integer>> 
-    calcEvaluatingOrder(List<Double> keys, ProblemData instanceData);
+    calcEvaluatingOrder(double[] keys, ProblemData instanceData);
 
     /**
      * Receives an array of random keys and decodes them into an instance of ChallengeSolution.
@@ -34,8 +34,8 @@ public abstract class Decoder {
      */
     abstract protected ChallengeSolution performDecode(List<List<Integer>> evaluationOrder, ProblemData instanceData);
 
-    final public ChallengeSolution decode(List<Double> keys, ProblemData instanceData){
-        if ( keys.size() != getRKeysSize(instanceData) ){
+    final public ChallengeSolution decode(double[] keys, ProblemData instanceData){
+        if ( keys.length != getRKeysSize(instanceData) ){
             throw new IllegalArgumentException("The number of keys is not the expected.");
         }
         List<List<Integer>> evaluationOrder = calcEvaluatingOrder(keys, instanceData);

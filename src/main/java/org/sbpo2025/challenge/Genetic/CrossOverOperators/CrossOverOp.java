@@ -1,6 +1,5 @@
 package org.sbpo2025.challenge.Genetic.CrossOverOperators;
 
-import java.util.List;
 import java.util.Random;
 
 public interface CrossOverOp {
@@ -15,5 +14,5 @@ public interface CrossOverOp {
      * @param random The random object to generate random numbers.
      * @return The random keys of the child.
      */
-    public List<Double> makeCrossOver(List<Double> bestParent, List<Double> worstParent, Double pBetterParent, Random random);
+    public double[] makeCrossOver(double[] bestParent, double[] worstParent, double pBetterParent, Random random);
 }
