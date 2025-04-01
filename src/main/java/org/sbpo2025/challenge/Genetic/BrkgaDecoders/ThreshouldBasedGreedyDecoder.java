@@ -1,6 +1,5 @@
 package org.sbpo2025.challenge.Genetic.BrkgaDecoders;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,7 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         return thresholdKeysQuantity + instanceData.orders().size() + instanceData.aisles().size();
     }
     @Override
-    protected List<List<Integer>> calcEvaluatingOrder(double[] keys, ProblemData instanceData) {
+    protected EvaluationOrder calcEvaluatingOrder(double[] keys, ProblemData instanceData) {
 
         Double aislesThreshould = keys[0];
         Double ordersThreshould = keys[1];
@@ -30,47 +29,46 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         int ordersFinishAt = firstOrderIndex + instanceData.orders().size();
         int aislesFinishAt = firstAisleIndex + instanceData.aisles().size();
 
-        List<Integer> orderIndexes = new ArrayList<>(instanceData.orders().size());
-        List<Integer> aisleIndexes = new ArrayList<>(instanceData.aisles().size());
+        EvaluationOrder evalOrder = new EvaluationOrder(instanceData);
         while ( orderIndex < ordersFinishAt && aisleIndex < aislesFinishAt ){
             if (keys[orderIndex] < ordersThreshould ){
-                orderIndexes.add(orderIndex - firstOrderIndex);
+                evalOrder.addOrder(orderIndex - firstOrderIndex);
             }
             if (keys[aisleIndex] < aislesThreshould ){
-                aisleIndexes.add(aisleIndex - firstAisleIndex);
+                evalOrder.addAisle(aisleIndex - firstAisleIndex);
             }
             orderIndex++;
             aisleIndex++;
         }
         while (orderIndex < ordersFinishAt){
             if (keys[orderIndex] < ordersThreshould ){
-                orderIndexes.add(orderIndex - firstOrderIndex);
+                evalOrder.addOrder(orderIndex - firstOrderIndex);
             }
             orderIndex++;
         }
         while (aisleIndex < aislesFinishAt){
             if (keys[aisleIndex] < aislesThreshould ){
-                aisleIndexes.add(aisleIndex - firstAisleIndex);
+                evalOrder.addAisle(aisleIndex - firstAisleIndex);
             }
             aisleIndex++;
         }
-        if ( aisleIndexes.isEmpty() ){
-            aisleIndexes = List.of(0);
+        if ( evalOrder.getCurrentAisleQuantity() == 0 ){
+            evalOrder.addAisle(0);
         }
-        return List.of(orderIndexes, aisleIndexes, List.of(aisleIndexes.size()));
+        return evalOrder;
     }
 
     private void countIntialItems(
         int[] quantItens,
-        List<Integer> aisleIndexes,
-        int QAisles,
+        EvaluationOrder evalOrder,
         ProblemData instanceData,
         HashSet<Integer> aisleResp
     ) {
         List<Map<Integer, Integer>> aisles = instanceData.aisles();
 
-        for (int i = 0; i < QAisles; i++) {
-            int aisleIndex = aisleIndexes.get(i);
+        EvaluationIterator aisleIterator = evalOrder.aisleIterator();
+        while ( aisleIterator.hasNext() ){
+            int aisleIndex = aisleIterator.next();
             Map<Integer, Integer> aisle = aisles.get(aisleIndex);
 
             for (Map.Entry<Integer, Integer> kv : aisle.entrySet()) {
@@ -82,23 +80,23 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
     }
 
     @Override
-    protected ChallengeSolution performDecode(List<List<Integer>> evaluationOrder, ProblemData instanceData) {
-        List<Integer> orderIndexes = evaluationOrder.get(0);
-        List<Integer> aisleIndexes = evaluationOrder.get(1);
-        List<Integer> qAisleIndexes = evaluationOrder.get(2);
-        Integer QAisles = qAisleIndexes.get(0);
+    protected ChallengeSolution performDecode(EvaluationOrder evaluationOrder, ProblemData instanceData) {
+        Integer QOrders = evaluationOrder.getCurrentOrderQuantity();
+        Integer QAisles = evaluationOrder.getCurrentAisleQuantity();
 
-        HashSet<Integer> orderResp = new HashSet<>(instanceData.orders().size());
+        HashSet<Integer> orderResp = new HashSet<>(QOrders);
         HashSet<Integer> aisleResp = new HashSet<>(QAisles);
 
         int[] QuantItens = new int[instanceData.nItems()];
-        countIntialItems(QuantItens, aisleIndexes, QAisles, instanceData, aisleResp);
+        countIntialItems(QuantItens, evaluationOrder, instanceData, aisleResp);
         
         int itensSum = 0;
         int waveSizeUB = instanceData.waveSizeUB();
         int waveSizeLB = instanceData.waveSizeLB();
-        
-        for (Integer order : orderIndexes) {
+
+        EvaluationIterator orderIterator = evaluationOrder.orderIterator();
+        while (orderIterator.hasNext()) {
+            int order = orderIterator.next();
             if (!isOrderServable(order, QuantItens, instanceData)) {
                 continue;
             }
@@ -117,7 +115,7 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         return new ChallengeSolution(orderResp, aisleResp, fo);
     }
 
-    private int sumOrderItems(Integer order, ProblemData instanceData) {
+    private int sumOrderItems(int order, ProblemData instanceData) {
         int sum = 0;
         Map<Integer, Integer> orderItems = instanceData.orders().get(order);
         for (int qty : orderItems.values()) {
