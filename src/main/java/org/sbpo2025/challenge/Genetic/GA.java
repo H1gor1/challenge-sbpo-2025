@@ -1,7 +1,6 @@
 package org.sbpo2025.challenge.Genetic;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -135,7 +134,7 @@ public class GA{
         int from,
         int to
     ){
-        return new ProbabilityWheel<>(pop.subList(from, to), (e) -> e.getRight().fo(), ThreadLocalRandom.current());
+        return new ProbabilityWheel<>(pop.subList(from, to), (e) -> e.getRight().fo());
     }
     private void makeCrossOvers(List<Pair<double[], ChallengeSolution>> oldPop, List<Pair<double[], ChallengeSolution>> nextPop, int quantity){
         final ProbabilityWheel<Pair<double[], ChallengeSolution>> eliteWheel = buildProbWheel(oldPop, 0, eliteSize);
@@ -159,15 +158,16 @@ public class GA{
                     ChallengeSolution decodedSol;
                     double[] childKeys;
                     for(;pFrom < pTo; pFrom++){
-                        bestParent = eliteWheel.get();
-                        worstParent = nonEliteWheel.get();
+                        bestParent = eliteWheel.get(RANDOM);
+                        worstParent = nonEliteWheel.get(RANDOM);
                         childKeys = crossOp.makeCrossOver(bestParent.getLeft(), worstParent.getLeft(), pbetterParent, RANDOM);
                         decodedSol = brkgaDecoder.decode(childKeys, instanceData);
+                        
                         synchronized (nextPop){
                             nextPop.add(Pair.of(
                                 childKeys,
                                 decodedSol
-                            ));   
+                            ));
                         }
                     }
                 }
@@ -177,9 +177,9 @@ public class GA{
     }
     public ChallengeSolution solve(){
 
-        List<Pair<double[], ChallengeSolution>> pop = Collections.synchronizedList(new ArrayList<>(psize));
-        List<Pair<double[], ChallengeSolution>> newPop;
-        List<Pair<double[], ChallengeSolution>> lastPromisingPop;
+        ArrayList<Pair<double[], ChallengeSolution>> pop = new ArrayList<>(psize);
+        ArrayList<Pair<double[], ChallengeSolution>> newPop;
+        ArrayList<Pair<double[], ChallengeSolution>> lastPromisingPop;
         ChallengeSolution bestOldPop, bestNewPop;
         ChallengeSolution bestSol;
 
@@ -191,8 +191,8 @@ public class GA{
         bestSol = pop.get(0).getRight();
         lastPromisingPop = pop;
         for ( int cGen = 0; cGen < ngen; cGen++){
-            newPop = new ArrayList<>(psize);
-            newPop.addAll(pop.subList(0, eliteSize));
+            newPop = new ArrayList<>(pop.subList(0, eliteSize));
+            newPop.ensureCapacity(psize);
             makeCrossOvers(pop, newPop, psize - eliteSize - mutationSize);
             generateMutants(newPop, mutationSize);
             threadPool.waitAll();
