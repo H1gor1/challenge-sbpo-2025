@@ -1,6 +1,5 @@
 package org.sbpo2025.challenge;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -45,12 +44,7 @@ public class ChallengeSolver {
             0.5,
             instanceData
         );
-        ChallengeSolution r = genetic.solve();
-        stopWatch.stop();
-        Duration runtime = stopWatch.getDuration();
-        System.out.println("Time taken: " + runtime.toMinutes() + " minutes");
-        System.out.println("FO of the solution found: " + r.fo());
-        return r;
+        return genetic.solve();
     }
 
     /*
