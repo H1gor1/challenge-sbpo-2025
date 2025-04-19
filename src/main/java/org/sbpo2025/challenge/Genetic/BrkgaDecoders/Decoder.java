@@ -1,5 +1,6 @@
 package org.sbpo2025.challenge.Genetic.BrkgaDecoders;
 
+
 import java.util.Map;
 
 import org.sbpo2025.challenge.ChallengeSolution;
@@ -75,12 +76,20 @@ class EvaluationOrder {
 
 public abstract class Decoder {
 
+
+    protected ProblemData instanceData;
+
+    public Decoder(ProblemData instanceData) {
+        this.instanceData = instanceData;
+    }
+
+    
     /**
      * Returns the number of random keys that the decoder needs to work.
      * 
      * The number of keys can be calculated based on the instance data.
      */
-    abstract public int getRKeysSize(ProblemData instanceData);
+    abstract public int getRKeysSize();
 
     /**
      * Builds a evaluation order instance  that means what is the order
@@ -91,27 +100,28 @@ public abstract class Decoder {
      * @return An instance of EvaluationOrder
      */
     abstract protected EvaluationOrder
-    calcEvaluatingOrder(double[] keys, ProblemData instanceData);
+    calcEvaluatingOrder(double[] keys);
 
     /**
-     * Receives an array of random keys and decodes them into an instance of ChallengeSolution.
+     * Receives the evaluation order instance calculated by the method 'calcEvaluatingOrder' from
+     * random keys received and applies some constructive heuristic to build a concret solution
      * 
      * @param evaluationOrder The order of evaluation that the constructive heuristic into should
      * consider to build the solution
      * @param instanceData The data of the current problem instance that was provided to solve it.
      * @return An instance of ChallengeSolution representing a valid solution to the problem.
      */
-    abstract protected ChallengeSolution performDecode(EvaluationOrder evaluationOrder, ProblemData instanceData);
+    abstract protected ChallengeSolution performDecode(EvaluationOrder evaluationOrder);
 
-    final public ChallengeSolution decode(double[] keys, ProblemData instanceData){
-        if ( keys.length != getRKeysSize(instanceData) ){
+    final public ChallengeSolution decode(double[] keys){
+        if ( keys.length != getRKeysSize() ){
             throw new IllegalArgumentException("The number of keys is not the expected.");
         }
-        EvaluationOrder evaluationOrder = calcEvaluatingOrder(keys, instanceData);
-        return performDecode(evaluationOrder, instanceData);
+        EvaluationOrder evaluationOrder = calcEvaluatingOrder(keys);
+        return performDecode(evaluationOrder);
     }
 
-    protected boolean isOrderServable(int orderIndex, int[] QuantItens, ProblemData instanceData){
+    protected boolean isOrderServable(int orderIndex, int[] QuantItens){
         Map<Integer, Integer> orderItems = instanceData.orders().get(orderIndex);
         for (Map.Entry<Integer, Integer> kv : orderItems.entrySet()){
             if (QuantItens[kv.getKey()] < kv.getValue()){
@@ -121,10 +131,19 @@ public abstract class Decoder {
         return true;
     }
 
-    protected void updateQuantItens(int orderIndex, int[] QuantItens, ProblemData instanceData){
+    protected void updateQuantItens(int orderIndex, int[] QuantItens){
         Map<Integer, Integer> orderItems = instanceData.orders().get(orderIndex);
         for(Map.Entry<Integer, Integer> kv : orderItems.entrySet()){
             QuantItens[kv.getKey()] -= kv.getValue();
         }
+    }
+
+    protected int sumOrderItems(int order) {
+        int sum = 0;
+        Map<Integer, Integer> orderItems = instanceData.orders().get(order);
+        for (int qty : orderItems.values()) {
+            sum += qty;
+        }
+        return sum;
     }
 }

@@ -9,19 +9,24 @@ import org.sbpo2025.challenge.ProblemData;
 
 public class ThreshouldBasedGreedyDecoder extends Decoder {
 
+    public ThreshouldBasedGreedyDecoder(ProblemData instanceData) {
+        super(instanceData);
+    }
+
     private final int thresholdKeysQuantity = 2;
+
     @Override
-    public int getRKeysSize(ProblemData instanceData) {
-        return thresholdKeysQuantity + instanceData.orders().size() + instanceData.aisles().size();
+    public int getRKeysSize() {
+        return thresholdKeysQuantity + Math.max(instanceData.orders().size(), instanceData.aisles().size());
     }
     @Override
-    protected EvaluationOrder calcEvaluatingOrder(double[] keys, ProblemData instanceData) {
+    protected EvaluationOrder calcEvaluatingOrder(double[] keys) {
 
         Double aislesThreshould = keys[0];
         Double ordersThreshould = keys[1];
 
         int firstOrderIndex = thresholdKeysQuantity;
-        int firstAisleIndex = firstOrderIndex + instanceData.orders().size();
+        int firstAisleIndex = thresholdKeysQuantity;
 
         int orderIndex = firstOrderIndex;
         int aisleIndex = firstAisleIndex;
@@ -61,7 +66,6 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
     private void countIntialItems(
         int[] quantItens,
         EvaluationOrder evalOrder,
-        ProblemData instanceData,
         HashSet<Integer> aisleResp
     ) {
         List<Map<Integer, Integer>> aisles = instanceData.aisles();
@@ -80,7 +84,7 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
     }
 
     @Override
-    protected ChallengeSolution performDecode(EvaluationOrder evaluationOrder, ProblemData instanceData) {
+    protected ChallengeSolution performDecode(EvaluationOrder evaluationOrder) {
         Integer QOrders = evaluationOrder.getCurrentOrderQuantity();
         Integer QAisles = evaluationOrder.getCurrentAisleQuantity();
 
@@ -88,7 +92,7 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         HashSet<Integer> aisleResp = new HashSet<>(QAisles);
 
         int[] QuantItens = new int[instanceData.nItems()];
-        countIntialItems(QuantItens, evaluationOrder, instanceData, aisleResp);
+        countIntialItems(QuantItens, evaluationOrder, aisleResp);
         
         int itensSum = 0;
         int waveSizeUB = instanceData.waveSizeUB();
@@ -97,16 +101,16 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         EvaluationIterator orderIterator = evaluationOrder.orderIterator();
         while (orderIterator.hasNext()) {
             int order = orderIterator.next();
-            if (!isOrderServable(order, QuantItens, instanceData)) {
+            if (!isOrderServable(order, QuantItens)) {
                 continue;
             }
-            int orderItens = sumOrderItems(order, instanceData);
+            int orderItens = sumOrderItems(order);
 
             if (itensSum + orderItens > waveSizeUB) {
                 continue;
             }
             itensSum += orderItens;
-            updateQuantItens(order, QuantItens, instanceData);
+            updateQuantItens(order, QuantItens);
             orderResp.add(order);
         }
 
@@ -115,12 +119,4 @@ public class ThreshouldBasedGreedyDecoder extends Decoder {
         return new ChallengeSolution(orderResp, aisleResp, fo);
     }
 
-    private int sumOrderItems(int order, ProblemData instanceData) {
-        int sum = 0;
-        Map<Integer, Integer> orderItems = instanceData.orders().get(order);
-        for (int qty : orderItems.values()) {
-            sum += qty;
-        }
-        return sum;
-    }
 }

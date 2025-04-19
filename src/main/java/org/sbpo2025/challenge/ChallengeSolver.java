@@ -33,18 +33,21 @@ public class ChallengeSolver {
         ProblemData instanceData = new ProblemData(orders, aisles, nItems, waveSizeLB, waveSizeUB);
         int cores = Runtime.getRuntime().availableProcessors();
         GA genetic = new GA(
-            new ThreshouldBasedGreedyDecoder(),
+            new ThreshouldBasedGreedyDecoder(instanceData),
             new UniformCrossOver(),
             cores,
             1500,
-            225,
+            300,
             1000,
             0.7,
-            0.15,
-            0.5,
+            0.2,
+            0.2,
             instanceData
         );
-        return genetic.solve();
+        ChallengeSolution r= genetic.solve();
+        System.out.println("time taken: " + stopWatch.getTime(TimeUnit.SECONDS) + "s");
+        System.out.println("solution FO: " + r.fo());
+        return r;
     }
 
     /*

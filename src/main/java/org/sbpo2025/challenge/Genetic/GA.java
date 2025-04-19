@@ -63,11 +63,11 @@ public class GA{
                 double[] currentRandomKeys;
                 ChallengeSolution decodedSol;
                 for (;pFrom < pTo; pFrom++ ){
-                    currentRandomKeys = new double[brkgaDecoder.getRKeysSize(instanceData)];
-                    for (int j = 0; j < brkgaDecoder.getRKeysSize(instanceData); j++){
+                    currentRandomKeys = new double[brkgaDecoder.getRKeysSize()];
+                    for (int j = 0; j < brkgaDecoder.getRKeysSize(); j++){
                         currentRandomKeys[j] = RANDOM.nextDouble();
                     }
-                    decodedSol = brkgaDecoder.decode(currentRandomKeys, instanceData);
+                    decodedSol = brkgaDecoder.decode(currentRandomKeys);
                     synchronized (nextGen){
                         nextGen.add(Pair.of(
                             currentRandomKeys,
@@ -161,7 +161,7 @@ public class GA{
                         bestParent = eliteWheel.get(RANDOM);
                         worstParent = nonEliteWheel.get(RANDOM);
                         childKeys = crossOp.makeCrossOver(bestParent.getLeft(), worstParent.getLeft(), pbetterParent, RANDOM);
-                        decodedSol = brkgaDecoder.decode(childKeys, instanceData);
+                        decodedSol = brkgaDecoder.decode(childKeys);
                         
                         synchronized (nextPop){
                             nextPop.add(Pair.of(
