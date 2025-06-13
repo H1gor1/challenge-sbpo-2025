@@ -20,29 +20,43 @@ public class ChallengeSolver {
     protected int waveSizeLB;
     protected int waveSizeUB;
 
+    // Novos parâmetros do algoritmo genético
+    protected int populationSize;
+    protected double crossoverRate;
+    protected double mutationRate;
+    protected int generations;
+    protected int individuals;
+
     public ChallengeSolver(
-            List<Map<Integer, Integer>> orders, List<Map<Integer, Integer>> aisles, int nItems, int waveSizeLB, int waveSizeUB) {
+            List<Map<Integer, Integer>> orders, List<Map<Integer, Integer>> aisles, int nItems,
+            int waveSizeLB, int waveSizeUB, int populationSize, double crossoverRate, double mutationRate
+    ) {
         this.orders = orders;
         this.aisles = aisles;
         this.nItems = nItems;
         this.waveSizeLB = waveSizeLB;
         this.waveSizeUB = waveSizeUB;
+        this.populationSize = populationSize;
+        this.crossoverRate = crossoverRate;
+        this.mutationRate = mutationRate;
+        this.generations = generations;
+        this.individuals = individuals;
     }
 
     public ChallengeSolution solve(StopWatch stopWatch) {
         ProblemData instanceData = new ProblemData(orders, aisles, nItems, waveSizeLB, waveSizeUB);
         int cores = Runtime.getRuntime().availableProcessors();
         GA genetic = new GA(
-            new ThreshouldBasedGreedyDecoder(instanceData),
-            new UniformCrossOver(),
-            cores,
-            1500,
-            300,
-            1000,
-            0.7,
-            0.2,
-            0.2,
-            instanceData
+                new ThreshouldBasedGreedyDecoder(instanceData),
+                new UniformCrossOver(),
+                Runtime.getRuntime().availableProcessors(),
+                populationSize,   // Novo parâmetro
+                generations,      // Novo parâmetro
+                individuals,      // Novo parâmetro
+                crossoverRate,    // Novo parâmetro
+                mutationRate,     // Novo parâmetro
+                0.2,
+                instanceData
         );
         ChallengeSolution r= genetic.solve();
         System.out.println("time taken: " + stopWatch.getTime(TimeUnit.SECONDS) + "s");

@@ -1,0 +1,5 @@
+populationSize "" integer (100, 3000)
+generations "" integer (100, 1000)
+individuals "" integer (500, 5000)
+crossoverRate "" real (0.5, 0.9)
+mutationRate "" real (0.01, 0.5)

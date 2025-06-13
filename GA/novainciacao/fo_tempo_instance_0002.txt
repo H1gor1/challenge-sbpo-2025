@@ -1,0 +1,2 @@
+Execution time: 7.7429 seconds
+FO of the solution found: 2.0

@@ -36,12 +36,12 @@ def compile_code(source_folder):
     return True
 
 
-def run_benchmark(source_folder, input_folder, output_folder):
-    # Make sure output folder exists
+def run_benchmark(source_folder, input_folder, output_folder, population_size, generations, individuals, crossover_rate, mutation_rate):
+    # Criar pasta de saída, se necessário
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    # Set the library path (if needed)
+    # Configurar o caminho das bibliotecas (se necessário)
     if USE_CPLEX and USE_OR_TOOLS:
         libraries = f"{OR_TOOLS_PATH}:{CPLEX_PATH}"
     elif USE_CPLEX:
@@ -54,8 +54,8 @@ def run_benchmark(source_folder, input_folder, output_folder):
     else:
         timeout_command = "timeout"
 
-    # Get the path to the JAR file
-    jar_path = os.path.join(source_folder, "target", "ChallengeSBPO2025-1.0.jar")
+    # Caminho do JAR
+    jar_path = os.path.join(source_folder, "target", "ChallengeSBPO2025-1.0-shaded.jar")
 
     for filename in os.listdir(input_folder):
         if filename.endswith(".txt"):
@@ -63,7 +63,7 @@ def run_benchmark(source_folder, input_folder, output_folder):
             input_file = os.path.join(input_folder, filename)
             output_file = os.path.join(output_folder, f"{os.path.splitext(filename)[0]}.txt")
 
-            # Main Java command
+            # Adicionando os parâmetros do iRace
             cmd = [
                 timeout_command,
                 MAX_RUNNING_TIME,
@@ -72,9 +72,15 @@ def run_benchmark(source_folder, input_folder, output_folder):
                 "-jar",
                 jar_path,
                 input_file,
-                output_file
+                output_file,
+                str(population_size),
+                str(generations),
+                str(individuals),
+                str(crossover_rate),
+                str(mutation_rate)
             ]
 
+            # Se CPLEX ou OR-Tools estiverem ativados, configurar `-Djava.library.path`
             if USE_CPLEX or USE_OR_TOOLS:
                 cmd.insert(3, f"-Djava.library.path={libraries}")
 
@@ -82,10 +88,10 @@ def run_benchmark(source_folder, input_folder, output_folder):
                 cmd,
                 stderr=subprocess.PIPE,
                 text=True,
-                cwd=source_folder  # Set working directory directly
+                cwd=source_folder  # Define o diretório de execução
             )
 
-            # Check for timeout (return code 124 is the standard timeout exit code)
+            # Verifica erro de timeout (código de saída 124 indica timeout)
             if result.returncode == 124:
                 error_msg = f"Execution timed out after {MAX_RUNNING_TIME} for {input_file}"
                 print(error_msg)
@@ -95,20 +101,29 @@ def run_benchmark(source_folder, input_folder, output_folder):
                 print(result.stderr)
                 raise RuntimeError(f"Execution failed for {input_file}: {result.stderr}")
 
-
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python run_challenge.py <source_folder> <input_folder> <output_folder>")
+    if len(sys.argv) != 9:
+        print(f"Erro: esperado 9 argumentos, mas recebeu {len(sys.argv)}.")
+        print("Uso correto: python run_challenge.py <source_folder> <input_folder> <output_folder> <population_size> <generations> <individuals> <crossover_rate> <mutation_rate>")
         sys.exit(1)
 
-    source_folder = sys.argv[1]
-    input_folder = sys.argv[2]
-    output_folder = sys.argv[3]
-
-    # Convert to absolute paths
-    source_folder = os.path.abspath(source_folder)
-    input_folder = os.path.abspath(input_folder)
-    output_folder = os.path.abspath(output_folder)
+    source_folder = os.path.abspath(sys.argv[1])
+    input_folder = os.path.abspath(sys.argv[2])
+    output_folder = os.path.abspath(sys.argv[3])
+    population_size = int(sys.argv[4])
+    generations = int(sys.argv[5])
+    individuals = int(sys.argv[6])
+    crossover_rate = float(sys.argv[7])
+    mutation_rate = float(sys.argv[8])
 
     if compile_code(source_folder):
-        run_benchmark(source_folder, input_folder, output_folder)
+        # Caminho do JAR gerado pelo Maven
+        jar_path = os.path.join(source_folder, "target", "ChallengeSBPO2025-1.0.jar")
+
+        # Verificação da existência do JAR antes de tentar executá-lo
+        if not os.path.exists(jar_path):
+            print(f"Erro: o JAR {jar_path} não foi encontrado. Certifique-se de que a compilação ocorreu corretamente.")
+            sys.exit(1)
+
+        # Se o JAR existir, prosseguir para rodar os benchmarks
+        run_benchmark(source_folder, input_folder, output_folder, population_size, generations, individuals, crossover_rate, mutation_rate)

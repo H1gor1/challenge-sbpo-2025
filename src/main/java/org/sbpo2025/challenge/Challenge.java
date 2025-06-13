@@ -109,20 +109,30 @@ public class Challenge {
     }
 
     public static void main(String[] args) {
-        // Start the stopwatch to track the running time
         StopWatch stopWatch = StopWatch.createStarted();
 
-        if (args.length != 2) {
-            System.out.println("Usage: java -jar target/ChallengeSBPO2025-1.0.jar <inputFilePath> <outputFilePath>");
+        if (args.length < 5) {
+            System.out.println("Usage: java -jar target/ChallengeSBPO2025-1.0.jar <inputFilePath> <outputFilePath> <param1> <param2> <param3>");
             return;
         }
 
-        Challenge challenge = new Challenge();
-        challenge.readInput(args[0]);
-        var challengeSolver = new ChallengeSolver(
-                challenge.orders, challenge.aisles, challenge.nItems, challenge.waveSizeLB, challenge.waveSizeUB);
-        ChallengeSolution challengeSolution = challengeSolver.solve(stopWatch);
+        String inputFilePath = args[0];
+        String outputFilePath = args[1];
 
-        challenge.writeOutput(challengeSolution, args[1]);
+        // Parâmetros que o iRace pode otimizar
+        int populationSize = Integer.parseInt(args[2]);
+        double crossoverRate = Double.parseDouble(args[3]);
+        double mutationRate = Double.parseDouble(args[4]);
+
+        Challenge challenge = new Challenge();
+        challenge.readInput(inputFilePath);
+
+        var challengeSolver = new ChallengeSolver(
+                challenge.orders, challenge.aisles, challenge.nItems, challenge.waveSizeLB, challenge.waveSizeUB,
+                populationSize, crossoverRate, mutationRate
+        );
+
+        ChallengeSolution challengeSolution = challengeSolver.solve(stopWatch);
+        challenge.writeOutput(challengeSolution, outputFilePath);
     }
 }
