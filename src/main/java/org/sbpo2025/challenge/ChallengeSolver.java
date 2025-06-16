@@ -36,12 +36,12 @@ public class ChallengeSolver {
             new ThreshouldBasedGreedyDecoder(instanceData),
             new UniformCrossOver(),
             cores,
-            1500,
-            300,
-            1000,
+            600,
+            80,
+            600,
             0.7,
-            0.2,
-            0.2,
+            0.1,
+            0.4,
             instanceData
         );
         ChallengeSolution r= genetic.solve();
