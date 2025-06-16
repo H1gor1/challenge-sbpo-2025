@@ -1,20 +1,18 @@
 package org.sbpo2025.challenge.Genetic.CrossOverOperators;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 
 public class UniformCrossOver implements CrossOverOp{
 
     @Override
-    public List<Double> makeCrossOver(List<Double> bestParent, List<Double> worstParent, Double pBetterParent, Random random) {
-        List<Double> child = new ArrayList<>(bestParent.size());
-        for(int i = 0; i < bestParent.size(); i++){
+    public double[] makeCrossOver(double[] bestParent, double[] worstParent, double pBetterParent, Random random) {
+        double[] child = new double[bestParent.length];
+        for(int i = 0; i < bestParent.length; i++){
             if(random.nextDouble() < pBetterParent){
-                child.add(bestParent.get(i));
+                child[i] = bestParent[i];
             }else{
-                child.add(worstParent.get(i));
+                child[i] = worstParent[i];
             }
         }
         return child;

@@ -31,18 +31,23 @@ public class ChallengeSolver {
 
     public ChallengeSolution solve(StopWatch stopWatch) {
         ProblemData instanceData = new ProblemData(orders, aisles, nItems, waveSizeLB, waveSizeUB);
+        int cores = Runtime.getRuntime().availableProcessors();
         GA genetic = new GA(
-            new ThreshouldBasedGreedyDecoder(),
-            1000,
-            150,
-            500,
+            new ThreshouldBasedGreedyDecoder(instanceData),
+            new UniformCrossOver(),
+            cores,
+            600,
+            80,
+            600,
             0.7,
-            0.15,
-            0.5,
-            instanceData,
-            new UniformCrossOver()
+            0.1,
+            0.4,
+            instanceData
         );
-        return genetic.solve();
+        ChallengeSolution r= genetic.solve();
+        System.out.println("time taken: " + stopWatch.getTime(TimeUnit.SECONDS) + "s");
+        System.out.println("solution FO: " + r.fo());
+        return r;
     }
 
     /*

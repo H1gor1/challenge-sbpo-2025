@@ -7,12 +7,13 @@ import org.sbpo2025.challenge.Genetic.ProbabilityWheel;
 public class TestProdabilityWheel {
     public static void main(String[] args) {
         List<Double> probList = List.of(0.2, 0.5, 0.3);
-        ProbabilityWheel<Double> pw = new ProbabilityWheel<>(probList, (e) -> e, new Random());
+        ProbabilityWheel<Double> pw = new ProbabilityWheel<>(probList, (e) -> e);
         int idx[] = new int[probList.size()];
         int total = 1000000;
 
+        Random random = new Random();
         for (int i = 0; i < total; i++) {
-            idx[probList.indexOf(pw.get())]++;
+            idx[probList.indexOf(pw.get(random))]++;
         }
 
         boolean result;

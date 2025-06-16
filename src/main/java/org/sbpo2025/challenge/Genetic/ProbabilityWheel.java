@@ -7,16 +7,10 @@ import java.util.function.Function;
 
 public class ProbabilityWheel <T>{
 
-    private final Random RANDOM;
     private final double[] pList;
     private final List<T> elements;
 
-    /**
-     * This method receives a probability distribution and builds a list of 
-     * accumulated probabilities to simulate a probability wheel.
-     * @param probDist The probability distribution to be used in the wheel
-     * @return A list of accumulated probabilities
-     */
+
     private double[] makeProbMap(List<T> elements, Function<T, Double> valueGetter, Double sum) {
 
         double[] probList = new double[elements.size()];
@@ -29,11 +23,16 @@ public class ProbabilityWheel <T>{
         return probList;
     }
 
-    public ProbabilityWheel(List<T> elements, Function<T, Double> valueGetter, Random random) {
+      /**
+     * This method receives a probability distribution and builds a list of 
+     * accumulated probabilities to simulate a probability wheel.
+     * @param probDist The probability distribution to be used in the wheel
+     * @param valueGetter A runnable that should be able of get the fitness value of each element in element list
+     */
+    public ProbabilityWheel(List<T> elements, Function<T, Double> valueGetter) {
         Double sum = elements.stream().mapToDouble(valueGetter::apply).sum();
         this.pList = makeProbMap(elements, valueGetter, sum);
         this.elements = elements;
-        this.RANDOM = random;
     }
 
     /**
@@ -41,8 +40,8 @@ public class ProbabilityWheel <T>{
      * given in the constructor of the class.
      * @return the selected index
      */
-    public T get() {
-        double value = RANDOM.nextDouble();
+    public T get(Random random) {
+        double value = random.nextDouble();
         int idx = Arrays.binarySearch(pList, value);
 
         /* This conversion is needed because when the value doesn't exist in the list,  
