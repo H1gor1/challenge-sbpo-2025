@@ -1,0 +1,8 @@
+# scenario.txt
+targetRunner = python3 -m irace.target_runner 
+parameterFile = parameters.txt
+instancesFile = instances.txt
+execDir = ./experiments
+logFile = irace-log.Rdata
+maxExperiments = 1000
+deterministic = FALSE
