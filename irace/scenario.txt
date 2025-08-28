@@ -1,8 +1,9 @@
-# scenario.txt
-targetRunner = python3 -m irace.target_runner 
-parameterFile = parameters.txt
-instancesFile = instances.txt
-execDir = ./experiments
-logFile = irace-log.Rdata
-maxExperiments = 1000
-deterministic = FALSE
+targetRunner="./target_runner.py"
+targetRunnerLauncher="python3"
+targetCmdline="{targetRunner} --seed {seed} --instance {instance} {targetRunnerArgs}"
+parameterFile="parameters.txt"
+execDir="../"
+logFile="irace-log.Rdata"
+maxExperiments=1000
+deterministic=FALSE
+trainInstancesDir="../datasets"

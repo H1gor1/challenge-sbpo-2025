@@ -1,8 +1,10 @@
-# the defaults values are the old ones used before integrate the IRACE
---ngen  i  (0, 3000)     [600]
---qGenWithoutImprovement -i (0, 1500) [80]
---psize i  (0, 4000)      [600]
---pbetterParent -r (0.0, 1.0)   [0,7]
---eliteFraction -r (0.0, 1.0)   [0.1]
---mutationFraction -r (0.0, 1.0)    [0.4]
---instanceDir - 
+ngen "--ngen " i (0,3000)
+qGenWithoutImprovement "--qGenWithoutImprovement " i (0,1500)
+psize "--psize " i (0,4000)
+pbetterParent "--pbetterParent " r (0.0,1.0)
+eliteFraction "--eliteFraction " r (0.0,1.0)
+mutationFraction "--mutationFraction " r (0.0,1.0)
+
+
+[forbidden]
+eliteFraction + mutationFraction >= 1

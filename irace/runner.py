@@ -1,7 +1,9 @@
 import pathlib
 import subprocess
+from textwrap import dedent
 
-IRACE_WORKING_DIR = pathlib.Path("../")
+PROJECT_DIR = pathlib.Path("../")
+SCENARIO_FILE = pathlib.Path("scenario.txt")
 
 def compile_code(source_folder) -> None:
     subprocess.run(
@@ -14,15 +16,17 @@ def compile_code(source_folder) -> None:
 
 
 def main():
-    compile_code(IRACE_WORKING_DIR)
+    compile_code(PROJECT_DIR)
     print("calling Irace parameter optimizer")
+    r_command = dedent(
+        f"""
+        library(irace)
+        scenario <- irace::readScenario("{SCENARIO_FILE.resolve()}")
+        irace::irace(scenario)
+        """
+    )
     subprocess.run(
-        [
-            "irace",
-            "--scenario=irace/scenario.txt",
-            "--instanceDir datasets"
-        ],
-        cwd=IRACE_WORKING_DIR,
+        ["Rscript", "-e", r_command],
         check=True
     )
 
