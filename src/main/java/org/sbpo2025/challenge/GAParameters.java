@@ -27,12 +27,12 @@ public record GAParameters(
         try (FileInputStream fis = new FileInputStream(envFp)) {
             props.load(fis);
         }
-        int ngen = parseEnvInt(() -> props.getProperty("ngen"), DEFAULT_NGEN);
-        int qGenWithoutImprovement = parseEnvInt(() -> props.getProperty("qGenWithoutImprovement"), DEFAULT_QGEN);
-        int psize = parseEnvInt(() -> props.getProperty("psize"), DEFAULT_PSIZE);
-        double pbetterParent = parseEnvDouble(() -> props.getProperty("pbetterParent"), DEFAULT_PBETTER_PARENT);
-        double eliteFraction = parseEnvDouble(() -> props.getProperty("eliteFraction"), DEFAULT_ELITE_FRACTION);
-        double mutationFraction = parseEnvDouble(() -> props.getProperty("mutationFraction"), DEFAULT_MUTATION_FRACTION);
+        int ngen = parseInt(() -> props.getProperty("ngen"), DEFAULT_NGEN);
+        int qGenWithoutImprovement = parseInt(() -> props.getProperty("qGenWithoutImprovement"), DEFAULT_QGEN);
+        int psize = parseInt(() -> props.getProperty("psize"), DEFAULT_PSIZE);
+        double pbetterParent = parseDouble(() -> props.getProperty("pbetterParent"), DEFAULT_PBETTER_PARENT);
+        double eliteFraction = parseDouble(() -> props.getProperty("eliteFraction"), DEFAULT_ELITE_FRACTION);
+        double mutationFraction = parseDouble(() -> props.getProperty("mutationFraction"), DEFAULT_MUTATION_FRACTION);
         return new GAParameters(ngen, qGenWithoutImprovement, psize, pbetterParent, eliteFraction, mutationFraction);
     }
     /**
@@ -52,18 +52,18 @@ public record GAParameters(
         }
         System.err.println("Loading GAParameters from environment variables if they are provided.");
         System.err.println("Otherwise, the default ones will be used.");
-        int ngen = parseEnvInt(() -> System.getenv("ngen"), DEFAULT_NGEN);
-        int qGenWithoutImprovement = parseEnvInt(() -> System.getenv("qGenWithoutImprovement"), DEFAULT_QGEN);
-        int psize = parseEnvInt(() -> System.getenv("psize"), DEFAULT_PSIZE);
-        double pbetterParent = parseEnvDouble(() -> System.getenv("pbetterParent"), DEFAULT_PBETTER_PARENT);
-        double eliteFraction = parseEnvDouble(() -> System.getenv("eliteFraction"), DEFAULT_ELITE_FRACTION);
-        double mutationFraction = parseEnvDouble(() -> System.getenv("mutationFraction"), DEFAULT_MUTATION_FRACTION);
+        int ngen = parseInt(() -> System.getenv("ngen"), DEFAULT_NGEN);
+        int qGenWithoutImprovement = parseInt(() -> System.getenv("qGenWithoutImprovement"), DEFAULT_QGEN);
+        int psize = parseInt(() -> System.getenv("psize"), DEFAULT_PSIZE);
+        double pbetterParent = parseDouble(() -> System.getenv("pbetterParent"), DEFAULT_PBETTER_PARENT);
+        double eliteFraction = parseDouble(() -> System.getenv("eliteFraction"), DEFAULT_ELITE_FRACTION);
+        double mutationFraction = parseDouble(() -> System.getenv("mutationFraction"), DEFAULT_MUTATION_FRACTION);
 
         return new GAParameters(ngen, qGenWithoutImprovement, psize,
                 pbetterParent, eliteFraction, mutationFraction);
     }
 
-    private static int parseEnvInt(Supplier<String> varGetter, int fallback) {
+    private static int parseInt(Supplier<String> varGetter, int fallback) {
         try {
             String val = varGetter.get();
             return (val != null) ? Integer.parseInt(val) : fallback;
@@ -72,7 +72,7 @@ public record GAParameters(
         }
     }
 
-    private static double parseEnvDouble(Supplier<String> varGetter, double fallback) {
+    private static double parseDouble(Supplier<String> varGetter, double fallback) {
         try {
             String val = varGetter.get();
             return (val != null) ? Double.parseDouble(val) : fallback;
