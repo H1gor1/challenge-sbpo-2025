@@ -31,7 +31,7 @@ def main():
 
         best <- irace::getFinalElites(irace_result, n = 1)[[1]]
         env_lines <- paste(names(best), best, sep="=")
-        writeLines(env_lines, ".env")
+        writeLines(env_lines, con=".env")
         """
     )
     subprocess.run(["Rscript", "-e", r_command], check=True)
